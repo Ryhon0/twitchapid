@@ -1,0 +1,12 @@
+name "dbot"
+description "A custom Twith bot for my channel"
+authors "Phillip Ledger <phillip@philderbast.com>"
+copyright "Copyright © 2017"
+license "BSD 2-clause"
+
+targetType "executable"
+targetPath "build"
+workingDirectory "data"
+
+#dependency "dlangui" version="~>0.9.172"
+dependency "dyaml" version="~>0.6.3"

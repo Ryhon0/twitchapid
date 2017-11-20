@@ -1,0 +1,8 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"dyaml": "0.6.3",
+		"ircbod2": "0.1.6",
+		"tinyendian": "0.1.2"
+	}
+}
