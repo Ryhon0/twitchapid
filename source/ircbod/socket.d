@@ -11,21 +11,6 @@ private:
     TcpSocket      sock;
     SocketStream   stream;
 
-    void write(string message)
-    {
-        import std.stdio : writeln;
-        writeln(">> " , message);
-        this.stream.writeString(message ~ "\r\n");
-    }
-
-    void writeOptional(string command, string[] optional = [])
-    {
-        if(optional.length > 0) {
-            command ~= " " ~ optional.join(" ");
-        }
-        write(command.strip());
-    }
-
 public:
 
     this(char[] host, ushort port = 6667)
@@ -72,6 +57,13 @@ public:
         return to!string(this.stream.readLine()).chomp();
     }
 
+    private void write(string message)
+    {
+        import std.stdio : writeln;
+        writeln(">> " , message);
+        this.stream.writeString(message ~ "\r\n");
+    }
+
     void raw(string[] args)
     {
         auto last = args[$ - 1];
@@ -84,6 +76,14 @@ public:
     void raw(string message)
     {
         write(message);
+    }
+
+    private void writeOptional(string command, string[] optional = [])
+    {
+        if(optional.length > 0) {
+            command ~= " " ~ optional.join(" ");
+        }
+        write(command.strip());
     }
 
     void pass(string password)

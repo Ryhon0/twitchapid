@@ -2,6 +2,8 @@ module ircbod.client;
 
 import ircbod.socket, ircbod.message;
 import std.regex, std.container, std.datetime, std.conv;
+import std.stdio : writeln;
+
 
 alias MessageHandler = void delegate(IRCMessage message);
 alias MessageHandlerWithArgs = void delegate(IRCMessage message, string[] args);
@@ -133,7 +135,6 @@ public:
         }
     }
 
-
     void run()
     {
         if(!connected())
@@ -141,10 +142,22 @@ public:
 
         scope(exit) disconnect();
 
-        import std.stdio : writeln;
-
         string line;
         while (this.running && (line = this.sock.read()).length > 0) {
+                writeln(line);
+                processLine(line);
+        }
+    }
+
+    void readMessage()
+    {
+        if(!connected())
+        {
+            connect();
+        }
+
+        string line;
+        if(this.running && (line = this.sock.read()).length > 0) {
             writeln(line);
             processLine(line);
         }
