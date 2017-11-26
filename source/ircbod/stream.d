@@ -485,6 +485,7 @@ class Stream : InputStream, OutputStream {
       case char.init:
         result.length = strlen;
         return result;
+
       default:
         if (strlen < result.length) {
           result[strlen] = ch;

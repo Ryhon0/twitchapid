@@ -1,4 +1,4 @@
 data/
 .dub/
 build/
-data/
+dub.selections.json

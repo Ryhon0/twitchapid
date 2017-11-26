@@ -1,63 +1,131 @@
 module main;
 
+import core.runtime;
+import core.sys.windows.windows;
 import ircbod.client, ircbod.message;
+import std.utf, std.conv;
 import dyaml;
+import gui.menus, gui.tabcontrols;
 
-IRCClient bot;
+static IRCClient bot;
+static bool running = false;
 
-void main(string[] args)
+string appName = "HarshStorm";
+HINSTANCE hInst;
+
+int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCmdShow)
 {
+    //set the window settings
+    MSG msg;
+    HWND window;
+    WNDCLASS windowClass = {};
+
+    windowClass.lpszClassName = appName.toUTF16z;
+    windowClass.style         = CS_HREDRAW | CS_VREDRAW;
+    windowClass.lpfnWndProc   =  cast(WNDPROC)&mainWindowCallback;
+    windowClass.hInstance     = instance;
+    windowClass.hbrBackground = cast(HBRUSH)GetStockObject(BLACK_BRUSH);
+    windowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+
+    if(!RegisterClass(&windowClass))
+    {
+        MessageBox(NULL, "This program requires Windows NT or later!", appName.toUTF16z, MB_ICONERROR);
+        return 0;
+    }
+
+    window = CreateWindow(appName.toUTF16z,    // window class name
+                         "Harsh Storm",        // window caption
+                         WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // window style
+                         CW_USEDEFAULT,        // initial x position
+                         CW_USEDEFAULT,        // initial y position
+                         1280,                 // initial x size
+                         720,                  // initial y size
+                         NULL,                 // parent window handle
+                         NULL,                 // window menu handle
+                         instance,             // program instance handle
+                         NULL);                // creation parameters
+
+    ShowWindow(window, iCmdShow);
+    UpdateWindow(window);
+
+    //setup UI?
+    startbot();
+
+    // run message loop
+    running = true;
+    while (running)
+    {   
+        bot.readLine();
+        //action all the windows messages
+        while (PeekMessage(&msg, NULL,0 , 0, PM_REMOVE))
+        {
+            if(msg.message == WM_QUIT || msg.message == WM_CLOSE)
+            {
+                running = FALSE;
+            }else
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+    }
+    
+    return cast(int) msg.wParam;
+}
+
+void startbot()
+{
+
+    //Read the config.
     Node root = Loader("config.yaml").load();
 
     string username = root["username"].as!string;
-    string oauthtoken = root["oauth-token"].as!string;
+    string oauth = root["oauth-token"].as!string;
 
     string[] channels;
-
     //Display the data read.
-    int i = 0;
     foreach(string channel; root["channels"])
     {
-        channels.length = i +1;
-        channels[i++] = channel;
+        channels ~= channel;
     }
 
-    bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauthtoken, channels);
+    bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauth, ["#philderbeast"]);
+
     bot.connect();
-    bot.sendRawMessage("CAP REQ :twitch.tv/membership");
-    bot.sendRawMessage("CAP REQ :twitch.tv/tags");
-    bot.sendRawMessage("CAP REQ :twitch.tv/commands");
-    registercommands();
 
-    while (true)
-    {
-        bot.readMessage();
-    }
+    bot.on(IRCMessage.Type.MESSAGE, r"^!hearts$", (msg, args) {
+        msg.reply("dPhildH");
+    });
 }
 
-void registercommands()
+/**
+ * the process that deals with the windows calls
+ */
+extern(Windows)
+LRESULT mainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    bot.on(IRCMessage.Type.MESSAGE, r"^!bnet$", (msg, args) 
-    {
-        if(msg.channel == "#philderbeast")
-        {
-            msg.reply("if you want to play with me add me on battle net Philderbeast#6549");
-        }
-    });
+    LRESULT result = 0;
+    static HMENU hMenu;
 
-    bot.on(IRCMessage.Type.MESSAGE, r"^!ctt$", (msg, args) 
-    {
-        if(msg.channel == "#philderbeast")
-        {
-            msg.reply("If you are enjoying the stream, feel free to click the following link to tweet out the stream and share it with your friends! http://ctt.ec/0aeNa");
-        }
-    });
+    POINT point;
 
-    bot.on(IRCMessage.Type.MESSAGE, r"^!bso7$", (msg, args) 
+    switch (message)
     {
-        if(msg.channel == "#philderbeast")
+        case WM_CREATE:
         {
-            msg.reply("#BSo7 - The Broadcaster's Salute was conceptualized in Jax_Macky's Twitch Channel April 28,2016 (https://www.twitch.tv/jax_macky). It creates awareness for, and helps promote other broadcasters, and is meant to be a respectful, organized way, to allow other broadcasters the privilege, of advertising their channel, in yours. It is a fantastic Twitch Networking Tool, that also helps you get new followers and viewers");
+            addMenus(window);
+            addTabControl(window, hInst);
+        } break;
+        case WM_CLOSE:
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+        } break;
+        default:
+        {
+             result = DefWindowProc(window, message, wParam, lParam);
         }
-    });
+    }
+    return result;
 }

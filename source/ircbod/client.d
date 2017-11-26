@@ -2,8 +2,6 @@ module ircbod.client;
 
 import ircbod.socket, ircbod.message;
 import std.regex, std.container, std.datetime, std.conv;
-import std.stdio : writeln;
-
 
 alias MessageHandler = void delegate(IRCMessage message);
 alias MessageHandlerWithArgs = void delegate(IRCMessage message, string[] args);
@@ -61,9 +59,14 @@ public:
         this.sock.nick(this.nickname);
         this.sock.user(this.nickname, 0, "*", "ircbod");
 
+        this.sock.capreq("twitch.tv/membership");
+        this.sock.capreq("twitch.tv/tags");
+        this.sock.capreq("twitch.tv/commands");
+
         foreach(c; this.channels) {
             this.sock.join(c);
         }
+
     }
 
     bool connected()
@@ -101,7 +104,6 @@ public:
     {
         on(type, regex(pattern), callback);
     }
-    
 
     void on(IRCMessage.Type type, Regex!char regex, MessageHandler callback)
     {
@@ -142,22 +144,23 @@ public:
 
         scope(exit) disconnect();
 
+        import std.stdio : writeln;
+
         string line;
         while (this.running && (line = this.sock.read()).length > 0) {
-                writeln(line);
-                processLine(line);
+            writeln(line);
+            processLine(line);
         }
     }
 
-    void readMessage()
+    void readLine()
     {
-        if(!connected())
-        {
-            connect();
-        }
+
+        import std.stdio : writeln;
 
         string line;
-        if(this.running && (line = this.sock.read()).length > 0) {
+        if ((line = this.sock.read()).length > 0)
+        {
             writeln(line);
             processLine(line);
         }
@@ -181,11 +184,6 @@ public:
     void sendMessageToUser(string message, string nickname)
     {
         this.sock.privmsg(nickname, message);
-    }
-
-    void sendRawMessage(string message)
-    {
-        this.sock.raw(message);
     }
 
     void broadcast(string message)

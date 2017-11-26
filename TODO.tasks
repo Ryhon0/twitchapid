@@ -1,0 +1,15 @@
+Net code:
+    ☐ replace stream.d and socketstream.d
+
+ICR functions:
+    ☐ parse twitch message header
+    ☐ parse join/part messages to a list of some type
+    ☐ allow better registering of commands
+
+GUI:
+    ☐ add tab view for channels
+    ☐ add user list
+    ☐ print messages in some sort of readable view
+    ☐ highlights when your username is mentioned
+    ☐ allow other words to give highlights
+    ☐ flash tab on highlights?

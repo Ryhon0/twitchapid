@@ -73,11 +73,6 @@ public:
         write(args.join(" "));
     }
 
-    void raw(string message)
-    {
-        write(message);
-    }
-
     private void writeOptional(string command, string[] optional = [])
     {
         if(optional.length > 0) {
@@ -124,6 +119,11 @@ public:
     void part(string channel, string message = "")
     {
         raw(["PART", channel, message]);
+    }
+
+    void capreq(string cap)
+    {
+        raw(["CAP", "REQ", cap]);
     }
 
     void topic(string channel, string topic = "")
