@@ -69,6 +69,11 @@ public:
 
     }
 
+    void join(string channel)
+    {
+        this.sock.join(channel);
+    }
+
     bool connected()
     {
         return this.sock.connected();

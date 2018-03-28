@@ -114,6 +114,7 @@ public:
     void join(string channel, string password = "")
     {
         writeOptional("JOIN " ~ channel, [password]);
+        
     }
 
     void part(string channel, string message = "")

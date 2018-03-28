@@ -70,7 +70,6 @@ int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCm
             }
         }
     }
-    
     return cast(int) msg.wParam;
 }
 
@@ -88,14 +87,15 @@ void startbot()
     foreach(string channel; root["channels"])
     {
         channels ~= channel;
+        addTab(channel);
     }
 
-    bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauth, ["#philderbeast"]);
-
+    bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauth, channels);
+    
     bot.connect();
 
     bot.on(IRCMessage.Type.MESSAGE, r"^!hearts$", (msg, args) {
-        msg.reply("dPhildH");
+        msg.reply("fakeLove fairLove sketchTink sketchT snowyLove snowyHug phildeH ladyve2Love gooderHeart gooderLove cherry4Love");
     });
 }
 

@@ -8,6 +8,6 @@ targetType "executable"
 targetPath "build"
 workingDirectory "data"
 
-libs "gdi32"
+libs "gdi32" "user32"
 
 dependency "dyaml" version="~>0.6.3"
