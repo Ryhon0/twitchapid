@@ -1,5 +1,5 @@
 name "dbot"
-description "A custom Twith bot for my channel"
+description "A custom Twitch bot for my channel"
 authors "Phillip Ledger <phillip@philderbast.com>"
 copyright "Copyright © 2017"
 license "BSD 2-clause"
@@ -8,6 +8,24 @@ targetType "executable"
 targetPath "build"
 workingDirectory "data"
 
-libs "gdi32" "user32"
-
 dependency "dyaml" version="~>0.6.3"
+
+configuration "windows" {
+  name "windows"
+  platform "windows"
+  targetType "executable"
+  sourcePaths "windows/source"
+  targetPath "build"
+  targetName "dbot"
+
+  libs "gdi32" "user32"
+}
+
+configuration "linux" {
+  name "linux"
+  platform "linux"
+  targetType "executable"
+  sourcePaths "linux/source"
+  targetPath "build"
+  targetName "dbot"
+}

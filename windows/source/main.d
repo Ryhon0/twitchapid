@@ -1,17 +1,33 @@
 module main;
 
+//core windows runtime
 import core.runtime;
 import core.sys.windows.windows;
-import ircbod.client, ircbod.message;
-import std.utf, std.conv;
-import dyaml;
-import gui.menus, gui.tabcontrols;
+import std.utf;
+import bot;
 
-static IRCClient bot;
-static bool running = false;
+/**
+ * default windows entry point wrapper for D
+ */
+extern(Windows)
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow)
+{
+    int result;
 
-string appName = "HarshStorm";
-HINSTANCE hInst;
+    try
+    {
+        Runtime.initialize();
+        result = myWinMain(hInstance, hPrevInstance, lpCmdLine, iCmdShow);
+        Runtime.terminate();
+    }
+    catch(Exception o)
+    {
+        MessageBox(null, o.toString().toUTF16z, "Error", MB_OK | MB_ICONEXCLAMATION);
+        result = 0;
+    }
+
+    return result;
+}
 
 int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCmdShow)
 {
@@ -35,16 +51,16 @@ int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCm
     }
 
     window = CreateWindow(appName.toUTF16z,    // window class name
-                         "Harsh Storm",        // window caption
-                         WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // window style
-                         CW_USEDEFAULT,        // initial x position
-                         CW_USEDEFAULT,        // initial y position
-                         1280,                 // initial x size
-                         720,                  // initial y size
-                         NULL,                 // parent window handle
-                         NULL,                 // window menu handle
-                         instance,             // program instance handle
-                         NULL);                // creation parameters
+    "Harsh Storm",        // window caption
+    WS_OVERLAPPEDWINDOW | WS_VISIBLE,  // window style
+    CW_USEDEFAULT,        // initial x position
+    CW_USEDEFAULT,        // initial y position
+    1280,                 // initial x size
+    720,                  // initial y size
+    NULL,                 // parent window handle
+    NULL,                 // window menu handle
+    instance,             // program instance handle
+    NULL);                // creation parameters
 
     ShowWindow(window, iCmdShow);
     UpdateWindow(window);
@@ -55,7 +71,7 @@ int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCm
     // run message loop
     running = true;
     while (running)
-    {   
+    {
         bot.readLine();
         //action all the windows messages
         while (PeekMessage(&msg, NULL,0 , 0, PM_REMOVE))
@@ -71,32 +87,6 @@ int myWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmdLine, int iCm
         }
     }
     return cast(int) msg.wParam;
-}
-
-void startbot()
-{
-
-    //Read the config.
-    Node root = Loader("config.yaml").load();
-
-    string username = root["username"].as!string;
-    string oauth = root["oauth-token"].as!string;
-
-    string[] channels;
-    //Display the data read.
-    foreach(string channel; root["channels"])
-    {
-        channels ~= channel;
-        addTab(channel);
-    }
-
-    bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauth, channels);
-    
-    bot.connect();
-
-    bot.on(IRCMessage.Type.MESSAGE, r"^!hearts$", (msg, args) {
-        msg.reply("fakeLove fairLove sketchTink sketchT snowyLove snowyHug phildeH ladyve2Love gooderHeart gooderLove cherry4Love");
-    });
 }
 
 /**
@@ -124,7 +114,7 @@ LRESULT mainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lPar
         } break;
         default:
         {
-             result = DefWindowProc(window, message, wParam, lParam);
+            result = DefWindowProc(window, message, wParam, lParam);
         }
     }
     return result;
