@@ -1,6 +1,6 @@
 module ircbod.socket;
 
-import std.socket, std.conv, std.string;
+import std.socket, std.conv, std.string, std.algorythm;
 import std.stdio : writeln;
 
 class IRCSocket
@@ -26,7 +26,10 @@ public:
 
     bool connect()
     {
-        this.sock   = new TcpSocket(new InternetAddress(this.host, this.port));
+        this.sock = new TcpSocket();
+        assert(this.sock.isAlive);
+        this.sock.connect(new InternetAddress(this.host, this.port));
+
         return true;
     }
 
@@ -53,16 +56,23 @@ public:
 
     string read()
     {
-        char[1024] buf;
-        auto datLength = sock.receive(buf[]);
+        char[] buf = new char[](2048);
+
+        if (!this.sock.isAlive)
+        {
+            writeln("Socket is dead");
+            return null;
+        }
+
+        auto datLength = this.sock.receive(buf[]);
         if (datLength == Socket.ERROR)
         {
             writeln("Connection error.");
             return null;
-        }
-        else if (datLength != 0)
+        } else
+        if (datLength > 0)
         {
-            string line = to!string(buf[0..datLength]).chomp();
+            string line = to!string(buf[0..datLength]);
             return line;
         }
         return "";
@@ -123,8 +133,10 @@ public:
 
     void join(string channel, string password = "")
     {
+        if(!channel.startsWith("#"))
+            channel = "#"~channel;
+
         writeOptional("JOIN " ~ channel, [password]);
-        
     }
 
     void part(string channel, string message = "")
