@@ -1,6 +1,7 @@
 module ircbod.socket;
 
-import std.socket, ircbod.socketstream, std.conv, std.string;
+import std.socket, std.conv, std.string;
+import std.stdio : writeln;
 
 class IRCSocket
 {
@@ -9,7 +10,6 @@ private:
     char[]         host;
     ushort         port;
     TcpSocket      sock;
-    SocketStream   stream;
 
 public:
 
@@ -27,7 +27,6 @@ public:
     bool connect()
     {
         this.sock   = new TcpSocket(new InternetAddress(this.host, this.port));
-        this.stream = new SocketStream(this.sock);
         return true;
     }
 
@@ -54,14 +53,25 @@ public:
 
     string read()
     {
-        return to!string(this.stream.readLine()).chomp();
+        char[1024] buf;
+        auto datLength = sock.receive(buf[]);
+        if (datLength == Socket.ERROR)
+        {
+            writeln("Connection error.");
+            return null;
+        }
+        else if (datLength != 0)
+        {
+            string line = to!string(buf[0..datLength]).chomp();
+            return line;
+        }
+        return "";
     }
 
     private void write(string message)
     {
-        import std.stdio : writeln;
         writeln(">> " , message);
-        this.stream.writeString(message ~ "\r\n");
+        sock.send(message ~ "\r\n");
     }
 
     void raw(string[] args)

@@ -10,7 +10,7 @@ static bool running = false;
 
 string appName = "HarshStorm";
 
-IRCClient startbot()
+void startbot()
 {
 
     //Read the config.
@@ -35,7 +35,6 @@ IRCClient startbot()
         msg.reply("fakeLove fairLove sketchTink sketchT snowyLove snowyHug phildeH ladyve2Love gooderHeart gooderLove cherry4Love");
     });
 
-    return bot;
-
+    bot.run();
 }
 
