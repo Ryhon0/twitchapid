@@ -10,7 +10,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}/data",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "preLaunchTask": "build",
             "MIMode": "gdb",
             "setupCommands": [
@@ -30,7 +30,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}/data",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "preLaunchTask": "build"
         }
     ]

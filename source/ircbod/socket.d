@@ -1,6 +1,6 @@
 module ircbod.socket;
 
-import std.socket, std.conv, std.string, std.algorythm;
+import std.socket, std.conv, std.string, std.algorithm;
 import std.stdio : writeln;
 
 class IRCSocket
@@ -10,6 +10,20 @@ private:
     char[]         host;
     ushort         port;
     TcpSocket      sock;
+
+    private void write(string message)
+    {
+        writeln(">> " , message);
+        sock.send(message ~ "\r\n");
+    }
+
+    private void writeOptional(string command, string[] optional = [])
+    {
+        if(optional.length > 0) {
+            command ~= " " ~ optional.join(" ");
+        }
+        write(command.strip());
+    }
 
 public:
 
@@ -56,7 +70,7 @@ public:
 
     string read()
     {
-        char[] buf = new char[](2048);
+        char[] buf = new char[](4096);
 
         if (!this.sock.isAlive)
         {
@@ -78,11 +92,7 @@ public:
         return "";
     }
 
-    private void write(string message)
-    {
-        writeln(">> " , message);
-        sock.send(message ~ "\r\n");
-    }
+
 
     void raw(string[] args)
     {
@@ -91,14 +101,6 @@ public:
             args[$ - 1] = ":" ~ last;
         }
         write(args.join(" "));
-    }
-
-    private void writeOptional(string command, string[] optional = [])
-    {
-        if(optional.length > 0) {
-            command ~= " " ~ optional.join(" ");
-        }
-        write(command.strip());
     }
 
     void pass(string password)
