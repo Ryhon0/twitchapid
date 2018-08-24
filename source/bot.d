@@ -2,7 +2,7 @@ module bot;
 
 import core.runtime;
 import ircbod.client, ircbod.message;
-import std.utf, std.conv;
+import std.utf, std.conv, std.string, std.algorithm;
 import dyaml;
 
 static IRCClient bot;
@@ -12,7 +12,6 @@ string appName = "HarshStorm";
 
 void startbot()
 {
-
     //Read the config.
     Node root = Loader("config.yaml").load();
 
@@ -32,7 +31,13 @@ void startbot()
     bot.connect();
 
     bot.on(IRCMessage.Type.MESSAGE, r"^!hearts$", (msg, args) {
-        msg.reply("fakeLove fairLove sketchTink sketchT snowyLove snowyHug phildeH ladyve2Love gooderHeart gooderLove cherry4Love");
+
+        if( msg.getTagValue("badges").canFind("moderator") || 
+            msg.getTagValue("badges").canFind("broadcaster") || 
+            msg.nickname.startsWith("philderbeast") )
+        {
+            msg.reply("GenderFluidPride NonBinaryPride IntersexPride PansexualPride AsexualPride TransgenderPride GayPride LesbianPride BisexualPride TwitchUnity fairLove nrcHeart2 sketchT nrcLove sketchTink lewHeart sketchLew lewSketch x47ymcLove nrcGH nrcDH phildeH ladyve2Love djstriLove");
+        }
     });
 
     bot.run();

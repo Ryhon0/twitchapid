@@ -24,6 +24,34 @@ private:
     HandlerList[IRCMessage.Type]    handlers;
     bool                            running;
 
+    
+    // Message from JTV..
+    // if (message.tags.username === 'jtv') {
+    //     // Someone is hosting the channel and the message contains how many viewers..
+    //     if (msg.includes('hosting you for')) {
+    //         const count = _.extractNumber(msg);
+
+    //         this.emit(
+    //         'hosted',
+    //         channel,
+    //         _.username(msg.split(' ')[0]),
+    //         count,
+    //         msg.includes('auto'),
+    //         );
+    //     } else if (msg.includes('hosting you')) {
+    //         // Some is hosting the channel, but no viewer(s) count provided in
+    //         // the message..
+    //         this.emit(
+    //         'hosted',
+    //         channel,
+    //         _.username(msg.split(' ')[0]),
+    //         0,
+    //         msg.includes('auto'),
+    //         );
+    //     }
+    // }
+
+
     static MATCHPRIV = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
     static MATCHCONN = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
     static MATCHPING = ctRegex!r"^PING (.+)$";
@@ -154,7 +182,7 @@ public:
             auto lines = splitLines(line);
             foreach (string l; lines)
             {
-                write(l);
+                writeln(l);
                 processLine(l);
             }
 
@@ -207,7 +235,6 @@ public:
 
 private:
 
-
     static struct TypeForString
     {
     private:
@@ -259,6 +286,7 @@ private:
             const type    = typeForString(typeStr);
             IRCMessage ircMessage = {
                 type,
+                "",
                 typeStr,
                 user,
                 channel,
@@ -269,6 +297,7 @@ private:
             handleMessage(ircMessage);
         }
         else if (auto matcher = match(message, MATCHPRIV)) {
+            auto tags    = matcher.captures[1];
             auto user    = matcher.captures[2];
             auto channel = matcher.captures[3];
             auto text    = matcher.captures[4];
@@ -276,6 +305,7 @@ private:
             auto type    = channel[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
             IRCMessage ircMessage = {
                 type,
+                tags,
                 text,
                 user,
                 channel,
