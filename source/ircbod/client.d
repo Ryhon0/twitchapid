@@ -1,7 +1,10 @@
 module ircbod.client;
 
 import ircbod.socket, ircbod.message;
-import std.regex, std.container, std.datetime, std.conv, std.stdio, std.string;
+import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm;
+debug(console) {
+    import std.stdio;
+}
 
 alias MessageHandler = void delegate(IRCMessage message);
 alias MessageHandlerWithArgs = void delegate(IRCMessage message, string[] args);
@@ -24,38 +27,12 @@ private:
     HandlerList[IRCMessage.Type]    handlers;
     bool                            running;
 
-    
-    // Message from JTV..
-    // if (message.tags.username === 'jtv') {
-    //     // Someone is hosting the channel and the message contains how many viewers..
-    //     if (msg.includes('hosting you for')) {
-    //         const count = _.extractNumber(msg);
 
-    //         this.emit(
-    //         'hosted',
-    //         channel,
-    //         _.username(msg.split(' ')[0]),
-    //         count,
-    //         msg.includes('auto'),
-    //         );
-    //     } else if (msg.includes('hosting you')) {
-    //         // Some is hosting the channel, but no viewer(s) count provided in
-    //         // the message..
-    //         this.emit(
-    //         'hosted',
-    //         channel,
-    //         _.username(msg.split(' ')[0]),
-    //         0,
-    //         msg.includes('auto'),
-    //         );
-    //     }
-    // }
-
-
-    static MATCHPRIV = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
-    static MATCHCONN = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
-    static MATCHPING = ctRegex!r"^PING (.+)$";
-    static MATCHALL  = ctRegex!r".*";
+    static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
+    static MATCHPRIV   = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
+    static MATCHCONN   = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
+    static MATCHPING   = ctRegex!r"^PING (.+)$";
+    static MATCHALL    = ctRegex!r".*";
 
 public:
 
@@ -64,7 +41,7 @@ public:
         this.sock     = new IRCSocket(server.dup, port);
         this.nickname = nickname;
         this.password = password;
-        this.channels = channels;
+        //this.channels = channels;
         this.running  = true;
     }
 
@@ -87,19 +64,23 @@ public:
         this.sock.nick(this.nickname);
         this.sock.user(this.nickname, 0, "*", "ircbod");
 
-        this.sock.capreq("twitch.tv/membership");
+        // this.sock.capreq("twitch.tv/membership");
         this.sock.capreq("twitch.tv/tags");
         this.sock.capreq("twitch.tv/commands");
-
-        foreach(c; this.channels) {
-            this.sock.join(c);
-        }
 
     }
 
     void join(string channel)
     {
-        this.sock.join(channel);
+        if(!channel.startsWith("#"))
+            channel = "#"~channel;
+
+        if(this.channels.find(channel).empty)
+        {
+            this.sock.join(channel);
+            this.channels.length++;
+            this.channels[this.channels.length -1] = channel;
+        }
     }
 
     bool connected()
@@ -182,7 +163,10 @@ public:
             auto lines = splitLines(line);
             foreach (string l; lines)
             {
-                writeln(l);
+                debug(console) {
+                    writeln(l);
+                }
+
                 processLine(l);
             }
 
@@ -200,7 +184,10 @@ public:
             auto lines = splitLines(line);
             foreach (string l; lines)
             {
-                write(l);
+                debug(console) {
+                    writeln(l);
+                }
+
                 processLine(l);
             }
         }
@@ -231,6 +218,11 @@ public:
         foreach(c; this.channels) {
             sendMessageToChannel(message, c);
         }
+    }
+
+    ulong getChannelCount()
+    {
+        return this.channels.length;
     }
 
 private:
@@ -278,7 +270,7 @@ private:
 
     void processLine(string message)
     {
-        if (auto matcher = match(message, MATCHCONN)) {
+        if (auto matcher = matchFirst(message, MATCHCONN)) {
             const user    = matcher.captures[1];
             const typeStr = matcher.captures[2];
             const channel = matcher.captures[3];
@@ -293,10 +285,9 @@ private:
                 time,
                 this
             };
-
             handleMessage(ircMessage);
         }
-        else if (auto matcher = match(message, MATCHPRIV)) {
+        else if (auto matcher = matchFirst(message, MATCHPRIV)) {
             auto tags    = matcher.captures[1];
             auto user    = matcher.captures[2];
             auto channel = matcher.captures[3];
@@ -315,9 +306,31 @@ private:
 
             handleMessage(ircMessage);
         }
-        else if (auto matcher = match(message, MATCHPING)) {
+        else if (auto matcher = matchFirst(message, MATCHHOSTTARGET)) {
+            auto user    = matcher.captures[1];
+            auto channel = matcher.captures[2];
+            auto text    = matcher.captures[3];
+            auto time    = to!DateTime(Clock.currTime());
+            auto type    = IRCMessage.Type.HOSTTARGET;
+            IRCMessage ircMessage = {
+                type,
+                "",
+                text,
+                user,
+                channel,
+                time,
+                this
+            };
+
+            handleMessage(ircMessage);
+        }
+        else if (auto matcher = matchFirst(message, MATCHPING)) {
             auto server = matcher.captures[1];
             this.sock.pong(server);
+        } else {
+            debug(console) {
+                writeln(message);
+            }
         }
     }
 
@@ -325,7 +338,7 @@ private:
     {
         if(message.type in this.handlers) {
             foreach(PatternMessageHandler h; this.handlers[message.type]) {
-                if(auto matcher = match(message.text, h.pattern)) {
+                if(auto matcher = matchFirst(message.text, h.pattern)) {
                     string[] args;
                     foreach(string m; matcher.captures) {
                         args ~= m;

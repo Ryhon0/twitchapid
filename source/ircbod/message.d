@@ -11,7 +11,8 @@ struct IRCMessage
         PRIV_MESSAGE,
         JOIN,
         PART,
-        QUIT
+        QUIT,
+        HOSTTARGET
     }
 
     Type        type;
