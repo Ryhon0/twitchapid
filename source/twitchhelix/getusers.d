@@ -1,10 +1,13 @@
 module twitchhelix.getusers;
 
+import core.stdc.time;
+import core.thread;
 import std.net.curl;
 import std.json;
 import std.stdio;
 import std.conv;
 import std.string;
+import std.datetime;
 import persistance.sqllite;
 
 struct User{
@@ -20,9 +23,18 @@ struct User{
     string email;
 }
 
+static time_t timeout = 0;
 
 int getUserId(string username)
 {
+
+    time_t now = Clock.currTime().toUnixTime();
+    if (timeout > now)
+    {
+        //sleep untill we can make the next request
+        long sleeptime = timeout - now;
+        Thread.sleep(dur!"seconds"(sleeptime));
+    }
 
     string request = "https://api.twitch.tv/helix/users?login="~ username;
 
@@ -40,20 +52,37 @@ int getUserId(string username)
     };
     
     http.perform();
+
+    string[string] headers = http.responseHeaders();
+
+    writeln(headers);
+
+    try {
+        if (headers["ratelimit-remaining"].to!int == 0)
+        {
+            timeout = headers["ratelimit-reset"].to!int;
+        }
+    } catch (Exception e)
+    {
+    }
+
     debug(ConsoleSpam)
     {
         writeln(jsonData);
     }
     JSONValue json = parseJSON(jsonData);
 
-    int id = to!int(json["data"][0]["id"].str);
-
-    addChannel(username, id);
-
-    debug(ConsoleSpam)
+    try{
+        int id = to!int(json["data"][0]["id"].str);
+        addChannel(username, id);
+        debug(ConsoleSpam)
+        {
+            writeln(id);
+        }
+        return id;
+    } catch (Exception e)
     {
-        writeln(id);
+        return -1;
     }
-    return id;
 
 }

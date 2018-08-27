@@ -10,6 +10,7 @@ workingDirectory "data"
 
 dependency "dyaml" version="~>0.6.3"
 dependency "d2sqlite3" version="~>0.16.2"
+subConfigurations "d2sqlite3" "all-included"
 
 configuration "windows" {
   name "windows"

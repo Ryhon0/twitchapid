@@ -38,18 +38,18 @@ void main(string[] args)
         // Thread.sleep(dur!("msecs")(10));
     }
     
-    // bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
-    //     string target = msg.text.split(" ")[0].chompPrefix("#");
-    //     string channel = msg.channel.chompPrefix("#");
-
-    //     int tid = findID(target);
-    //     int cid = findID(channel);
-
-    //     addHost(cid, tid);
-
-    //     bot.join(target);
-
-    // });
+    bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
+        string target = msg.text.split(" ")[0].chompPrefix("#");
+        string channel = msg.channel.chompPrefix("#");
+        int tid = findID(target);
+        int cid = findID(channel);
+        if (tid == -1 || cid == -1)
+        {
+            return;
+        }
+        addHost(cid, tid);
+        bot.join(target);
+    });
 
     bot.on(IRCMessage.Type.MESSAGE, r"^!channelcount$", (msg, args) {
             msg.reply("I am in " ~ bot.getChannelCount().to!string ~ " Channels");
