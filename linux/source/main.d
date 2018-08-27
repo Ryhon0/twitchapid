@@ -1,7 +1,10 @@
 module main;
 
 import core.runtime;
+import core.thread;
 import ircbod.client, ircbod.message;
+import twitchhelix.getusers;
+import persistance.sqllite;
 import std.utf, std.conv, std.string, std.algorithm, std.stdio;
 import dyaml;
 
@@ -11,34 +14,42 @@ static bool running = false;
 void main(string[] args)
 {
 
-    //Read the config.
+    setupDb();
+
+    // Read the config.
     Node root = Loader("config.yaml").load();
 
     string username = root["username"].as!string;
     string oauth = root["oauth-token"].as!string;
 
     string[] channels;
-    //Display the data read.
     foreach(string channel; root["channels"])
     {
         channels ~= channel;
-        //addTab(channel);
     }
 
     bot = new IRCClient("irc.chat.twitch.tv", 6667, username, oauth, channels);
 
     bot.connect();
+    channels ~= getChannels();
     foreach (string channel; channels)
     {
         bot.join(channel);
+        // Thread.sleep(dur!("msecs")(10));
     }
-     
-    bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
-        writeln(msg.text);
-        writeln("attempting to join " ~ msg.text.split(" ")[0]);
-        bot.join( msg.text.split(" ")[0]);
+    
+    // bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
+    //     string target = msg.text.split(" ")[0].chompPrefix("#");
+    //     string channel = msg.channel.chompPrefix("#");
 
-    });
+    //     int tid = findID(target);
+    //     int cid = findID(channel);
+
+    //     addHost(cid, tid);
+
+    //     bot.join(target);
+
+    // });
 
     bot.on(IRCMessage.Type.MESSAGE, r"^!channelcount$", (msg, args) {
             msg.reply("I am in " ~ bot.getChannelCount().to!string ~ " Channels");
@@ -56,4 +67,13 @@ void main(string[] args)
     bot.run();
 }
 
-
+int findID(string channel) {
+    int id = checkForChannel(channel);
+    if (id > 0)
+    {
+        return id;
+    } else
+    {
+        return getUserId(channel);
+    }
+}
