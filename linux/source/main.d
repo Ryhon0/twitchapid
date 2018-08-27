@@ -11,6 +11,8 @@ import dyaml;
 static IRCClient bot;
 static bool running = false;
 
+string[][] hostevents;
+
 void main(string[] args)
 {
 
@@ -37,19 +39,16 @@ void main(string[] args)
         bot.join(channel);
         // Thread.sleep(dur!("msecs")(10));
     }
-    
-    // bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
-    //     string target = msg.text.split(" ")[0].chompPrefix("#");
-    //     string channel = msg.channel.chompPrefix("#");
 
-    //     int tid = findID(target);
-    //     int cid = findID(channel);
+    bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
 
-    //     addHost(cid, tid);
+        string target = msg.text.split(" ")[0].chompPrefix("#");
+        string channel = msg.channel.chompPrefix("#");
 
-    //     bot.join(target);
+        string[] event = [ target, channel ];
+        hostevents ~= event;
 
-    // });
+    });
 
     bot.on(IRCMessage.Type.MESSAGE, r"^!channelcount$", (msg, args) {
             msg.reply("I am in " ~ bot.getChannelCount().to!string ~ " Channels");
@@ -64,7 +63,44 @@ void main(string[] args)
     //     }
     // });
 
+    //TODO: we might need to do our own loop here
+
     bot.run();
+}
+
+
+void actionHost(string[][] hostevents)
+{
+    if (hostevents.length >= 100)
+    {
+        string[][] eventstoaction = hostevents[0 .. 99][];
+        hostevents = hostevents[100 .. hostevents.length][];
+
+        int[] tid = findID(eventstoaction[][0]);
+        int[] cid = findID(eventstoaction[][1]);
+
+        for(int i = 0; tid.length; i++)
+        {
+            addHost(cid[i], tid[i]);
+        }
+
+        foreach(string target; eventstoaction[][0])
+        {
+            bot.join(target);
+        }
+    }
+}
+
+int[] findID(string[] channels)
+{
+
+    int[] results;
+
+    foreach (string channel; channels)
+    {
+        results ~= findID(channel);
+    }
+    return results;
 }
 
 int findID(string channel) {
