@@ -1,4 +1,4 @@
-module persistance.sqllite;
+module persistance.sqlite;
 
 // Note: exception handling is left aside for clarity.
 import d2sqlite3;

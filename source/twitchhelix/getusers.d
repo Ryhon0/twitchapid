@@ -8,7 +8,7 @@ import std.json;
 import std.conv;
 import std.string;
 import std.datetime;
-import persistance.sqllite;
+import persistance.sqlite;
 import twitchhelix.h_helix;
 
 // debug(ConsoleSpam)

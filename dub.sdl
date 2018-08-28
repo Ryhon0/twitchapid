@@ -4,9 +4,7 @@ authors "Phillip Ledger <phillip@philderbast.com>"
 copyright "Copyright © 2017"
 license "BSD 2-clause"
 
-targetType "executable"
-targetPath "build"
-workingDirectory "data"
+targetType "library"
 
 dependency "dyaml" version="~>0.6.3"
 dependency "d2sqlite3" version="~>0.16.2"
