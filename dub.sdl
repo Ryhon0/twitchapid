@@ -3,7 +3,6 @@ description "A basic library for connecting to twitch chat and related api calls
 authors "Phillip Ledger <phillip@philderbast.com>"
 copyright "Copyright © 2017"
 license "BSD 2-clause"
-version "0.0.1"
 
 targetType "executable"
 targetPath "build"
