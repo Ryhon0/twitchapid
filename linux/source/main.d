@@ -37,12 +37,9 @@ void main(string[] args)
     bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
         string target = msg.text.split(" ")[0].chompPrefix("#");
         string channel = msg.channel.chompPrefix("#");
-
         user host = {};
         host.login = target;
-
         hosts ~= host;
-
         actionHosts(hosts);
         
     });
@@ -56,11 +53,26 @@ void main(string[] args)
     //         msg.getTagValue("badges").canFind("broadcaster") || 
     //         msg.nickname.startsWith("philderbeast") )
     //     {
-    //         msg.reply("GenderFluidPride NonBinaryPride IntersexPride PansexualPride AsexualPride TransgenderPride GayPride LesbianPride BisexualPride TwitchUnity fairLove nrcHeart2 sketchT nrcLove sketchTink lewHeart sketchLew lewSketch x47ymcLove nrcGH nrcDH phildeH ladyve2Love djstriLove");
+    //         loveSpam(msg);
+    //     }
+    // });
+
+    // bot.on(IRCMessage.Type.MESSAGE, r"^!ladyve2love ladyve2love ladyve2love ladyve2love ladyve2love ladyve2love.*$", (msg, args) {
+    //     if( msg.getTagValue("badges").canFind("moderator") || 
+    //         msg.getTagValue("badges").canFind("broadcaster") || 
+    //         msg.nickname.startsWith("ladyvertical") )
+    //     {
+    //         loveSpam(msg);
     //     }
     // });
 
     bot.run();
+}
+
+void loveSpam(IRCMessage msg)
+{
+    Thread.sleep(dur!"msecs"(1000));
+    msg.reply("skiwiLove rocksLOVE ricketLove bldfLOVE ladyve2Love happycLove nrcGH nrcDH learnt1Heart tovgLove vandyLove djstriLove nrcHeart2 sketchTink lewSketch sketchLew autmLove techLove nettyHeart minmoLOVE sutoLove bittieLove gandsLessthanthree gandsGameEngine gandsTWC aaronLOVE ktrHug bggLove fairLove matxHeart lillexiLove lewHeart phildeH oroLove ogaHeart ariaHeart tokyLuv vixenLOVE");
 }
 
 void actionHosts(user[] hosts)
@@ -80,7 +92,7 @@ void actionHosts(user[] hosts)
             {
                 bot.join(hosts[0].login);
             }
-            hosts.remove(0);
+            hosts = hosts.remove(0);
         } else
         {
             running = false;
