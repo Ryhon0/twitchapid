@@ -80,7 +80,7 @@ int getUserId(string username)
             writeln(id);
         }
         return id;
-    } catch (Exception e)
+    } catch (JSONException e)
     {
         return -1;
     }
