@@ -1,3 +1,3 @@
 #!/bin/sh
 
-dub build --=config=linux
+dub build --config=linux
