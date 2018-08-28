@@ -12,17 +12,6 @@ dependency "dyaml" version="~>0.6.3"
 dependency "d2sqlite3" version="~>0.16.2"
 subConfigurations "d2sqlite3" "all-included"
 
-configuration "windows" {
-  name "windows"
-  platform "windows"
-  targetType "executable"
-  sourcePaths "windows/source"
-  targetPath "build"
-  targetName "dbot"
-
-  libs "gdi32" "user32"
-}
-
 configuration "linux" {
   name "linux"
   platform "linux"
