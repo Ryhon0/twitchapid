@@ -3,40 +3,35 @@ module twitchhelix.getusers;
 import core.stdc.time;
 import core.thread;
 import std.net.curl;
+import std.concurrency;
 import std.json;
-import std.stdio;
 import std.conv;
 import std.string;
 import std.datetime;
 import persistance.sqllite;
+import twitchhelix.h_helix;
 
-struct User{
-    int id;
-    string login;
-    string display_name;
-    string type;
-    string broadcaster_type;
-    string description;
-    string profile_image_url;
-    string offline_image_url;
-    int viewcount;
-    string email;
-}
+// debug(ConsoleSpam)
+// {
+    import std.stdio;
+// }
 
 static time_t timeout = 0;
 
-int getUserId(string username)
+user[] getHostIds(user[] hostsToAction)
 {
-
     time_t now = Clock.currTime().toUnixTime();
     if (timeout > now)
     {
-        //sleep untill we can make the next request
-        long sleeptime = timeout - now;
-        Thread.sleep(dur!"seconds"(sleeptime));
+        return hostsToAction;
     }
 
-    string request = "https://api.twitch.tv/helix/users?login="~ username;
+    string request = "https://api.twitch.tv/helix/users?login="~ hostsToAction[0].login ;
+
+    for (int i = 1; i < hostsToAction.length && i >= 100 ; i++)
+    {
+        request ~= "&login="~ hostsToAction[i].login;
+    }
 
     auto http = HTTP();
     http.url = request;
@@ -46,43 +41,66 @@ int getUserId(string username)
     string jsonData;
 
     http.onReceive = (ubyte[] data ) {
-
         jsonData = cast(string)data;
         return data.length;
     };
     
-    http.perform();
+
+    try{
+        http.perform();
+    } catch (CurlException e)
+    {
+        return hostsToAction;
+    }
 
     string[string] headers = http.responseHeaders();
 
-    writeln(headers);
+    debug(ConsoleSpam)
+    {
+        writeln(headers);
+    }
 
-    try {
+    if ("ratelimit-remaining" in headers){
         if (headers["ratelimit-remaining"].to!int == 0)
         {
-            timeout = headers["ratelimit-reset"].to!int;
+            if ("ratelimit-reset" in headers){
+                timeout = headers["ratelimit-reset"].to!int;
+            }
         }
-    } catch (Exception e)
-    {
     }
 
     debug(ConsoleSpam)
     {
         writeln(jsonData);
     }
-    JSONValue json = parseJSON(jsonData);
-
+    
     try{
-        int id = to!int(json["data"][0]["id"].str);
-        addChannel(username, id);
+
+        JSONValue json = parseJSON(jsonData);
+
+        int j = 0;
+
+        for (int i = 0; i < hostsToAction.length && i <= 100; i++)
+        {
+            if ("id" in json["data"][i])
+            {
+                int id = to!int(json["data"][i]["id"].str);
+                hostsToAction[i].id = id;
+            }else 
+            {
+                hostsToAction[i].id = -1;
+            }
+            writeln(hostsToAction[i].id);
+        }
+
         debug(ConsoleSpam)
         {
             writeln(id);
         }
-        return id;
     } catch (JSONException e)
     {
-        return -1;
     }
+
+    return hostsToAction;
 
 }
