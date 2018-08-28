@@ -270,67 +270,72 @@ private:
 
     void processLine(string message)
     {
-        if (auto matcher = matchFirst(message, MATCHCONN)) {
-            const user    = matcher.captures[1];
-            const typeStr = matcher.captures[2];
-            const channel = matcher.captures[3];
-            const time    = to!DateTime(Clock.currTime());
-            const type    = typeForString(typeStr);
-            IRCMessage ircMessage = {
-                type,
-                "",
-                typeStr,
-                user,
-                channel,
-                time,
-                this
-            };
-            handleMessage(ircMessage);
-        }
-        else if (auto matcher = matchFirst(message, MATCHPRIV)) {
-            auto tags    = matcher.captures[1];
-            auto user    = matcher.captures[2];
-            auto channel = matcher.captures[3];
-            auto text    = matcher.captures[4];
-            auto time    = to!DateTime(Clock.currTime());
-            auto type    = channel[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
-            IRCMessage ircMessage = {
-                type,
-                tags,
-                text,
-                user,
-                channel,
-                time,
-                this
-            };
+        try 
+        {
+            //we cant garentee what the server sends so silently ignore errors
 
-            handleMessage(ircMessage);
-        }
-        else if (auto matcher = matchFirst(message, MATCHHOSTTARGET)) {
-            auto user    = matcher.captures[1];
-            auto channel = matcher.captures[2];
-            auto text    = matcher.captures[3];
-            auto time    = to!DateTime(Clock.currTime());
-            auto type    = IRCMessage.Type.HOSTTARGET;
-            IRCMessage ircMessage = {
-                type,
-                "",
-                text,
-                user,
-                channel,
-                time,
-                this
-            };
-
-            handleMessage(ircMessage);
-        }
-        else if (auto matcher = matchFirst(message, MATCHPING)) {
-            auto server = matcher.captures[1];
-            this.sock.pong(server);
-        } else {
-            debug(console) {
-                writeln(message);
+            if (auto matcher = matchFirst(message, MATCHCONN)) {
+                const user    = matcher.captures[1];
+                const typeStr = matcher.captures[2];
+                const channel = matcher.captures[3];
+                const time    = to!DateTime(Clock.currTime());
+                const type    = typeForString(typeStr);
+                IRCMessage ircMessage = {
+                    type,
+                    "",
+                    typeStr,
+                    user,
+                    channel,
+                    time,
+                    this
+                };
+                handleMessage(ircMessage);
             }
+            else if (auto matcher = matchFirst(message, MATCHPRIV)) {
+                auto tags    = matcher.captures[1];
+                auto user    = matcher.captures[2];
+                auto channel = matcher.captures[3];
+                auto text    = matcher.captures[4];
+                auto time    = to!DateTime(Clock.currTime());
+                auto type    = channel[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
+                IRCMessage ircMessage = {
+                    type,
+                    tags,
+                    text,
+                    user,
+                    channel,
+                    time,
+                    this
+                };
+
+                handleMessage(ircMessage);
+            }
+            else if (auto matcher = matchFirst(message, MATCHHOSTTARGET)) {
+                auto user    = matcher.captures[1];
+                auto channel = matcher.captures[2];
+                auto text    = matcher.captures[3];
+                auto time    = to!DateTime(Clock.currTime());
+                auto type    = IRCMessage.Type.HOSTTARGET;
+                IRCMessage ircMessage = {
+                    type,
+                    "",
+                    text,
+                    user,
+                    channel,
+                    time,
+                    this
+                };
+
+                handleMessage(ircMessage);
+            }
+            else if (auto matcher = matchFirst(message, MATCHPING)) {
+                auto server = matcher.captures[1];
+                this.sock.pong(server);
+            }
+
+        } catch (Exception e)
+        {
+            //silently ignore the error
         }
     }
 

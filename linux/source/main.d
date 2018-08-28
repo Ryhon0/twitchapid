@@ -35,12 +35,15 @@ void main(string[] args)
     }
     
     bot.on(IRCMessage.Type.HOSTTARGET, (msg, args) {
-        string target = msg.text.split(" ")[0].chompPrefix("#");
-        string channel = msg.channel.chompPrefix("#");
-        user host = {};
-        host.login = target;
-        hosts ~= host;
-        actionHosts(hosts);
+        try{
+            string target = msg.text.split(" ")[0].chompPrefix("#");
+            string channel = msg.channel.chompPrefix("#");
+            user host = {};
+            host.login = target;
+            hosts ~= host;
+            actionHosts(hosts);
+        }catch (Exception e)
+        {}
         
     });
 
