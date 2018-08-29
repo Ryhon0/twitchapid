@@ -9,33 +9,40 @@ import std.conv;
 import std.string;
 import std.datetime;
 import helix.h_helix;
-
-// debug(ConsoleSpam)
-// {
-    import std.stdio;
-// }
+import std.stdio;
 
 static time_t timeout = 0;
+
+debug(ConsoleSpam)
+{
+    static printTimeout = true;
+}
 
 user[] getHostIds(user[] hostsToAction)
 {
     time_t now = Clock.currTime().toUnixTime();
 
-    if (hostsToAction.length >= 100)
-    {
-        writeln("hosts in queue: " ~ hostsToAction.length.to!string);
-    }
     if (timeout > now)
     {
-        writeln("ratelimit timeout: " ~ timeout.to!string);
-        writeln("now: " ~ now.to!string);
-
+        debug(ConsoleSpam)
+        {
+            if (printTimeout)
+            {
+                writeln("ratelimit timeout: " ~ timeout.to!string);
+                writeln("now: " ~ now.to!string);
+                printTimeout = false;
+            }
+        }
         return hostsToAction;
+    }
+    debug(ConsoleSpam)
+    {
+        printTimeout = true;
     }
 
     string request = "https://api.twitch.tv/helix/users?login="~ hostsToAction[0].login ;
 
-    for (int i = 1; i < hostsToAction.length && i <= 100 ; i++)
+    for (int i = 1; i < hostsToAction.length && i < 100; i++)
     {
         request ~= "&login="~ hostsToAction[i].login;
     }
@@ -45,10 +52,10 @@ user[] getHostIds(user[] hostsToAction)
     http.addRequestHeader("Client-Id", "ved7yonqaz6vopc761g3h2zocb9ej0");
     http.method = HTTP.Method.get;
 
-    string jsonData;
+    string jsonData = "";
 
     http.onReceive = (ubyte[] data ) {
-        jsonData = cast(string)data;
+        jsonData ~= cast(string)data;
         return data.length;
     };
     
@@ -57,6 +64,8 @@ user[] getHostIds(user[] hostsToAction)
         http.perform();
     } catch (CurlException e)
     {
+        writeln ("api lookup failed");
+        writeln(request);
         return hostsToAction;
     }
 
@@ -82,29 +91,48 @@ user[] getHostIds(user[] hostsToAction)
     }
     
     try{
-
         JSONValue json = parseJSON(jsonData);
 
         int j = 0;
-
-        for (int i = 0; i < hostsToAction.length && i <= 100; i++)
-        {
-            if ("id" in json["data"][i])
-            {
-                int id = to!int(json["data"][i]["id"].str);
-                hostsToAction[i].id = id;
-            }else 
-            {
-                hostsToAction[i].id = -1;
-            }
-        }
-
         debug(ConsoleSpam)
         {
-            writeln(id);
+            writeln(hostsToAction.length.to!string ~ " users inqueue");
         }
+        if ("data" in json)
+        {
+            debug(ConsoleSpam)
+            {
+                writeln(json["data"].array.length.to!string ~ " users fetched");
+            }
+
+            for (int i = 0; i < hostsToAction.length && i < 100; i++)
+            {
+                if ("id" in json["data"][i])
+                {
+                    int id = to!int(json["data"][i]["id"].str);
+                    hostsToAction[i].id = id;
+                }else 
+                {
+                    hostsToAction[i].id = -1;
+                }
+            }
+
+            debug(ConsoleSpam)
+            {
+                writeln(id);
+            }
+        } else
+        {
+            writeln("unexpected response");
+            writeln(jsonData);
+            writeln(request);
+
+        }
+        
     } catch (JSONException e)
     {
+        writeln("unable to read Json");
+        writeln(jsonData);
     }
 
     return hostsToAction;

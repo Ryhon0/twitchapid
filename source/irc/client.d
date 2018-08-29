@@ -158,7 +158,10 @@ public:
 
         scope(exit) disconnect();
 
-        string line;
+        while (running)
+        {
+            readLine();
+        }
         
     }
 

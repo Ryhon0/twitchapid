@@ -13,7 +13,10 @@ private:
 
     private void write(string message)
     {
-        writeln(">> " , message);
+        debug(ConsoleSpam)
+        {
+            writeln(">> " , message);
+        }
         sock.send(message ~ "\r\n");
     }
 
@@ -22,6 +25,7 @@ private:
         if(optional.length > 0) {
             command ~= " " ~ optional.join(" ");
         }
+        
         write(command.strip());
     }
 
