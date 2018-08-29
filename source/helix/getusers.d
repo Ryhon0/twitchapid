@@ -18,8 +18,22 @@ debug(ConsoleSpam)
     static printTimeout = true;
 }
 
+private static string clientid;
+
+public void setClientId(string cid)
+{
+    clientid = cid;
+}
+
 user[] getHostIds(user[] hostsToAction)
 {
+
+    if (clientid == null)
+    {
+        writeln("You must set the client id using setClientid(string clientid); before making requests");
+        return hostsToAction;
+    }
+
     time_t now = Clock.currTime().toUnixTime();
 
     if (timeout > now)
@@ -49,7 +63,7 @@ user[] getHostIds(user[] hostsToAction)
 
     auto http = HTTP();
     http.url = request;
-    http.addRequestHeader("Client-Id", "ved7yonqaz6vopc761g3h2zocb9ej0");
+    http.addRequestHeader("Client-Id", clientid);
     http.method = HTTP.Method.get;
 
     string jsonData = "";
@@ -117,10 +131,6 @@ user[] getHostIds(user[] hostsToAction)
                 }
             }
 
-            debug(ConsoleSpam)
-            {
-                writeln(id);
-            }
         } else
         {
             writeln("unexpected response");
