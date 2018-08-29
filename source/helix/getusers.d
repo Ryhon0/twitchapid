@@ -36,7 +36,7 @@ user[] getHostIds(user[] hostsToAction)
 
     time_t now = Clock.currTime().toUnixTime();
 
-    if (timeout > now)
+    if (timeout >= now)
     {
         debug(ConsoleSpam)
         {
