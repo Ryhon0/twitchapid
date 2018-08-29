@@ -159,18 +159,7 @@ public:
         scope(exit) disconnect();
 
         string line;
-        while (this.running && (line = this.sock.read()).length > 0) {
-            auto lines = splitLines(line);
-            foreach (string l; lines)
-            {
-                debug(console) {
-                    writeln(l);
-                }
-
-                processLine(l);
-            }
-
-        }
+        
     }
 
     void readLine()
@@ -336,6 +325,8 @@ private:
         } catch (Exception e)
         {
             //silently ignore the error
+            import std.stdio;
+            writeln("Error in line: " ~ message);
         }
     }
 

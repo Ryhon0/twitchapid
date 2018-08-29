@@ -1,7 +1,7 @@
 name "twitchapid"
 description "A basic library for connecting to twitch chat and related api calls"
-authors "Phillip Ledger <phillip@philderbast.com>"
-copyright "Copyright © 2017"
+authors "Phillip Ledger <phillip@philderbeast.com>"
+copyright "Copyright © 2017 - 2018"
 license "BSD 2-clause"
 
 targetType "library"
@@ -9,3 +9,5 @@ targetType "library"
 dependency "dyaml" version="~>0.6.3"
 dependency "d2sqlite3" version="~>0.16.2"
 subConfigurations "d2sqlite3" "all-included"
+
+
