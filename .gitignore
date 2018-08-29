@@ -2,3 +2,4 @@ data/
 .dub/
 build/
 dub.selections.json
+libtwitchapid.a
