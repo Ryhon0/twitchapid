@@ -170,19 +170,8 @@ public:
 
         import std.stdio : writeln;
 
-        string line;
-        if ((line = this.sock.read()).length > 0)
-        {
-            auto lines = splitLines(line);
-            foreach (string l; lines)
-            {
-                debug(console) {
-                    writeln(l);
-                }
-
-                processLine(l);
-            }
-        }
+        string line = this.sock.readln();
+        processLine(line);
     }
 
     bool isRunning()

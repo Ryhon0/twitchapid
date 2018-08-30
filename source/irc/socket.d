@@ -10,6 +10,7 @@ private:
     char[]         host;
     ushort         port;
     TcpSocket      sock;
+    string         rxbuffer;
 
     private void write(string message)
     {
@@ -90,12 +91,34 @@ public:
         } else
         if (datLength > 0)
         {
-            string line = to!string(buf[0..datLength]);
+            string line = buf.to!string;
             return line;
         }
         return "";
     }
 
+    string readln()
+    {
+        string line;
+        if (!rxbuffer.empty)
+        {
+            auto lines = splitLines(rxbuffer);
+
+            if (lines.length > 1)
+            {
+                line = lines[0];
+                //RFC1493 lines will always end with CR/LF
+                rxbuffer = rxbuffer.chompPrefix(line ~ '\r' ~ '\n');
+            } else if(endsWith(rxbuffer, "\r\n"))
+            {
+                line = rxbuffer.chomp();
+            }
+            return line;
+        }
+
+        rxbuffer ~= read();
+        return readln();
+    }
 
 
     void raw(string[] args)
