@@ -1,7 +1,7 @@
 module irc.client;
 
 import irc.socket, irc.message;
-import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm;
+import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm, std.array;
 debug(console) {
     import std.stdio;
 }
@@ -75,7 +75,7 @@ public:
         if(!channel.startsWith("#"))
             channel = "#"~channel;
 
-        if(this.channels.find(channel).empty)
+        if(this.channels.find(channel).empty())
         {
             this.sock.join(channel);
             this.channels.length++;

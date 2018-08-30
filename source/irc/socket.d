@@ -1,6 +1,6 @@
 module irc.socket;
 
-import std.socket, std.conv, std.string, std.algorithm;
+import std.socket, std.conv, std.string, std.algorithm, std.array;
 import std.stdio : writeln;
 
 class IRCSocket
