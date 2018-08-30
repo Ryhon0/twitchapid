@@ -168,7 +168,6 @@ public:
     void readLine()
     {
         import std.stdio : writeln;
-
         string line = this.sock.readln();
         processLine(line);
     }
@@ -323,8 +322,8 @@ private:
         } catch (Exception e)
         {
             //silently ignore the error
-            import std.stdio;
-            writeln("Error in line: " ~ message);
+            // import std.stdio;
+            // writeln("Error in line: " ~ message);
         }
     }
 

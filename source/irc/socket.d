@@ -100,6 +100,7 @@ public:
     string readln()
     {
         string line;
+
         if (!rxbuffer.empty)
         {
             auto lines = splitLines(rxbuffer);
@@ -108,16 +109,23 @@ public:
             {
                 line = lines[0];
                 //RFC1493 lines will always end with CR/LF
-                rxbuffer = rxbuffer.chompPrefix(line ~ '\r' ~ '\n');
+                rxbuffer = rxbuffer.chompPrefix(line ~ "\r\n");
             } else if(endsWith(rxbuffer, "\r\n"))
             {
                 line = rxbuffer.chomp();
+            } else 
+            {
+                rxbuffer ~= read();
+                return readln();
             }
+            recursion = 0;
             return line;
-        }
 
-        rxbuffer ~= read();
-        return readln();
+        } else
+        {
+            rxbuffer ~= read();
+            return readln();
+        }
     }
 
 
