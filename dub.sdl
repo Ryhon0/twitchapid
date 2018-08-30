@@ -7,7 +7,3 @@ license "BSD 2-clause"
 targetType "library"
 
 dependency "dyaml" version="~>0.6.3"
-dependency "d2sqlite3" version="~>0.16.2"
-subConfigurations "d2sqlite3" "all-included"
-
-

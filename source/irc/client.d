@@ -167,7 +167,6 @@ public:
 
     void readLine()
     {
-
         import std.stdio : writeln;
 
         string line = this.sock.readln();
