@@ -113,14 +113,13 @@ public:
             } else if(endsWith(rxbuffer, "\r\n"))
             {
                 line = rxbuffer.chomp();
+                rxbuffer = "";
             } else 
             {
                 rxbuffer ~= read();
                 return readln();
             }
-            recursion = 0;
             return line;
-
         } else
         {
             rxbuffer ~= read();
