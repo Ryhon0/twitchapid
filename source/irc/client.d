@@ -296,6 +296,13 @@ private:
                 auto text    = matcher.captures[3];
                 auto time    = to!DateTime(Clock.currTime());
                 auto type    = IRCMessage.Type.HOSTTARGET;
+
+                if (text.empty)
+                {
+                    writeln("empty text match" ~ message);
+                    return;
+                }
+
                 IRCMessage ircMessage = {
                     type,
                     "",
