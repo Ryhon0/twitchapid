@@ -322,8 +322,7 @@ private:
         } catch (Exception e)
         {
             //silently ignore the error
-            // import std.stdio;
-            // writeln("Error in line: " ~ message);
+            writeln("Error in line: " ~ message);
         }
     }
 

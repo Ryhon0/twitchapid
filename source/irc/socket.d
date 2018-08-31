@@ -86,7 +86,7 @@ public:
         } else
         if (datLength > 0)
         {
-            string line = buf.to!string;
+            string line = buf[0 .. datLength].to!string;
             return line;
         }
         return "";
@@ -121,7 +121,6 @@ public:
             return readln();
         }
     }
-
 
     void raw(string[] args)
     {
