@@ -77,16 +77,11 @@ public:
     {
         char[] buf = new char[](4096);
 
-        if (!this.sock.isAlive)
-        {
-            writeln("Socket is dead");
-            return null;
-        }
-
         auto datLength = this.sock.receive(buf[]);
-        if (datLength == Socket.ERROR)
+        if (datLength == Socket.ERROR || datLength == 0)
         {
-            writeln("Connection error.");
+            writeln("Connection error. reconnecting");
+            reconnect();
             return null;
         } else
         if (datLength > 0)
