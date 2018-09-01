@@ -200,9 +200,9 @@ public:
         }
     }
 
-    bool inChannel(string c)
+    bool inChannel(string c) 
     {
-        return(bot.channels.find(channelsToJoin[0]).empty);
+        return this.channels.find(c).empty;
     }
 
     ulong getChannelCount()
