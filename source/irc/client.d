@@ -199,9 +199,12 @@ public:
         }
     }
 
-    bool inChannel(string c) 
+    bool inChannel(string channel) 
     {
-        return this.channels.find(c).empty;
+        if(!channel.startsWith("#"))
+            channel = "#"~channel;
+            
+        return !(this.channels.find(channel).empty);
     }
 
     ulong getChannelCount()
