@@ -36,12 +36,11 @@ private:
 
 public:
 
-    this(string server, ushort port, string nickname, string password = null, string[] channels = [])
+    this(string server, ushort port, string nickname, string password = null)
     {
         this.sock     = new IRCSocket(server.dup, port);
         this.nickname = nickname;
         this.password = password;
-        //this.channels = channels;
         this.running  = true;
     }
 
