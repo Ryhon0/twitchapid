@@ -63,7 +63,6 @@ public:
         this.sock.nick(this.nickname);
         this.sock.user(this.nickname, 0, "*", "ircbod");
 
-        // this.sock.capreq("twitch.tv/membership");
         this.sock.capreq("twitch.tv/tags");
         this.sock.capreq("twitch.tv/commands");
 
@@ -77,8 +76,8 @@ public:
         if(this.channels.find(channel).empty())
         {
             this.sock.join(channel);
-            this.channels.length++;
-            this.channels[this.channels.length -1] = channel;
+            // this.channels.length++;
+            this.channels[] ~= channel;
         }
     }
 
@@ -199,6 +198,11 @@ public:
         foreach(c; this.channels) {
             sendMessageToChannel(message, c);
         }
+    }
+
+    bool inChannel(string c)
+    {
+        return(bot.channels.find(channelsToJoin[0]).empty);
     }
 
     ulong getChannelCount()
