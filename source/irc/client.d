@@ -20,19 +20,18 @@ private:
 
     alias HandlerList = DList!PatternMessageHandler;
 
-    IRCSocket                       sock;
-    string                          nickname;
-    string                          password;
-    string[]                        channels;
-    HandlerList[IRCMessage.Type]    handlers;
-    bool                            running;
-
+    IRCSocket                    sock;
+    string                       nickname;
+    string                       password;
+    string[]                     channels;
+    HandlerList[IRCMessage.Type] handlers;
+    bool                         running;
 
     static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
-    static MATCHPRIV   = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
-    static MATCHCONN   = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
-    static MATCHPING   = ctRegex!r"^PING (.+)$";
-    static MATCHALL    = ctRegex!r".*";
+    static MATCHPRIV       = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
+    static MATCHCONN       = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
+    static MATCHPING       = ctRegex!r"^PING (.+)$";
+    static MATCHALL        = ctRegex!r".*";
 
 public:
 
@@ -76,8 +75,8 @@ public:
         if(this.channels.find(channel).empty())
         {
             this.sock.join(channel);
-            // this.channels.length++;
-            this.channels[] ~= channel;
+            this.channels.length++;
+            this.channels[$-1] = channel;
         }
     }
 
