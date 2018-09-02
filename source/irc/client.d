@@ -257,7 +257,6 @@ private:
         try 
         {
             //we cant garentee what the server sends so silently ignore errors
-            // static MATCHCONN       = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
             if (line.canFind("JOIN") || line.canFind("PART") || line.canFind("QUIT"))
             {
                 const parts = line.split(" ");
@@ -278,13 +277,14 @@ private:
                 handleMessage(ircMessage);
             } else if (line.canFind("PRIVMSG"))
             {
+                // static MATCHPRIV       = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
                 const parts   = line.split(" ");
                 auto tags    = parts[0].chompPrefix("@");
                 auto user    = parts[1].split("!")[0].chompPrefix(":");
-                auto channel = parts[3].chompPrefix(":");
+                auto channel = parts[3];
                 auto text    = line.split(":")[2];
                 auto time    = to!DateTime(Clock.currTime());
-                auto type    = (parts[1])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
+                auto type    = (parts[3])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
                 IRCMessage ircMessage = {
                     type,
                     tags,
