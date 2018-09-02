@@ -2,9 +2,7 @@ module irc.client;
 
 import irc.socket, irc.message;
 import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm, std.array;
-debug(console) {
-    import std.stdio;
-}
+
 
 alias MessageHandler = void delegate(IRCMessage message);
 alias MessageHandlerWithArgs = void delegate(IRCMessage message, string[] args);
@@ -26,13 +24,7 @@ private:
     string[]                     channels;
     HandlerList[IRCMessage.Type] handlers;
     bool                         running;
-
-    static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
-    static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
-    static MATCHPRIV       = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
-    static MATCHCONN       = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
-    static MATCHPING       = ctRegex!r"^PING (.+)$";
-    static MATCHALL        = ctRegex!r".*";
+    string                       line;
 
 public:
 
@@ -160,17 +152,16 @@ public:
         {
             readLine();
         }
-        
     }
 
     void readLine()
     {
-        string line = this.sock.readln();
+        line = this.sock.readln();
         debug(ConsoleSpam)
         {
             writeln("<< " ~ line);
         }
-        processLine(line);
+        processLine();
     }
 
     bool isRunning()
@@ -256,16 +247,23 @@ private:
 
     alias typeForString = TypeForString;
 
-    void processLine(string message)
+    static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
+    static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
+    static MATCHPING       = ctRegex!r"^PING (.+)$";
+    static MATCHALL        = ctRegex!r".*";
+
+    void processLine()
     {
         try 
         {
             //we cant garentee what the server sends so silently ignore errors
-
-            if (auto matcher = matchFirst(message, MATCHCONN)) {
-                const user    = matcher.captures[1];
-                const typeStr = matcher.captures[2];
-                const channel = matcher.captures[3];
+            // static MATCHCONN       = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
+            if (line.canFind("JOIN") || line.canFind("PART") || line.canFind("QUIT"))
+            {
+                const parts = line.split(" ");
+                const user    = parts[0].split("!")[0].chompPrefix(":");
+                const typeStr = parts[1];
+                const channel = parts[2].chompPrefix(":");
                 const time    = to!DateTime(Clock.currTime());
                 const type    = typeForString(typeStr);
                 IRCMessage ircMessage = {
@@ -278,14 +276,15 @@ private:
                     this
                 };
                 handleMessage(ircMessage);
-            }
-            else if (auto matcher = matchFirst(message, MATCHPRIV)) {
-                auto tags    = matcher.captures[1];
-                auto user    = matcher.captures[2];
-                auto channel = matcher.captures[3];
-                auto text    = matcher.captures[4];
+            } else if (line.canFind("PRIVMSG"))
+            {
+                const parts   = line.split(" ");
+                auto tags    = parts[0].chompPrefix("@");
+                auto user    = parts[1].split("!")[0].chompPrefix(":");
+                auto channel = parts[3].chompPrefix(":");
+                auto text    = line.split(":")[2];
                 auto time    = to!DateTime(Clock.currTime());
-                auto type    = channel[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
+                auto type    = (parts[1])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
                 IRCMessage ircMessage = {
                     type,
                     tags,
@@ -297,13 +296,13 @@ private:
                 };
 
                 handleMessage(ircMessage);
-            }else if(auto matcher = matchFirst(message, MATCHNOTICE))
+            } else if(auto matcher = matchFirst(line, MATCHNOTICE))
             {
-                auto tags    = matcher.captures[1];
-                auto channel = matcher.captures[2];
-                auto text    = matcher.captures[3];
-                auto time    = to!DateTime(Clock.currTime());
-                auto type    =IRCMessage.Type.NOTICE;
+                const tags    = matcher.captures[1];
+                const channel = matcher.captures[2];
+                const text    = matcher.captures[3];
+                const time    = to!DateTime(Clock.currTime());
+                const type    =IRCMessage.Type.NOTICE;
                 IRCMessage ircMessage = {
                     type,
                     tags,
@@ -316,17 +315,17 @@ private:
 
                 handleMessage(ircMessage);
 
-            }
-            else if (auto matcher = matchFirst(message, MATCHHOSTTARGET)) {
-                auto user    = matcher.captures[1];
-                auto channel = matcher.captures[2];
-                auto text    = matcher.captures[3];
-                auto time    = to!DateTime(Clock.currTime());
-                auto type    = IRCMessage.Type.HOSTTARGET;
+            } else if (auto matcher = matchFirst(line, MATCHHOSTTARGET))
+            {
+                const user    = matcher.captures[1];
+                const channel = matcher.captures[2];
+                const text    = matcher.captures[3];
+                const time    = to!DateTime(Clock.currTime());
+                const type    = IRCMessage.Type.HOSTTARGET;
 
                 if (text.empty)
                 {
-                    writeln("empty text match" ~ message);
+                    writeln("empty text match" ~ line);
                     return;
                 }
 
@@ -341,17 +340,18 @@ private:
                 };
 
                 handleMessage(ircMessage);
-            }
-            else if (auto matcher = matchFirst(message, MATCHPING)) {
-                auto server = matcher.captures[1];
+            } else if (auto matcher = matchFirst(line, MATCHPING))
+            {
+                const server = matcher.captures[1];
                 this.sock.pong(server);
             }
 
         } catch (Exception e)
         {
             //silently ignore the error
-            writeln("Error in line: " ~ message);
+            writeln("Error in line: " ~ line);
         }
+
     }
 
     void handleMessage(IRCMessage message)
