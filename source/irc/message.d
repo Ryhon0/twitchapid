@@ -12,7 +12,8 @@ struct IRCMessage
         JOIN,
         PART,
         QUIT,
-        HOSTTARGET
+        HOSTTARGET,
+        NOTICE
     }
 
     Type        type;

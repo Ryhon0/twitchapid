@@ -28,6 +28,7 @@ private:
     bool                         running;
 
     static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
+    static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
     static MATCHPRIV       = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
     static MATCHCONN       = ctRegex!r"^:(\S+)\!\S+ (JOIN|PART|QUIT) :?(\S+).*";
     static MATCHPING       = ctRegex!r"^PING (.+)$";
@@ -296,6 +297,25 @@ private:
                 };
 
                 handleMessage(ircMessage);
+            }else if(auto matcher = matchFirst(message, MATCHNOTICE))
+            {
+                auto tags    = matcher.captures[1];
+                auto channel = matcher.captures[2];
+                auto text    = matcher.captures[3];
+                auto time    = to!DateTime(Clock.currTime());
+                auto type    =IRCMessage.Type.NOTICE;
+                IRCMessage ircMessage = {
+                    type,
+                    tags,
+                    text,
+                    "",
+                    channel,
+                    time,
+                    this
+                };
+
+                handleMessage(ircMessage);
+
             }
             else if (auto matcher = matchFirst(message, MATCHHOSTTARGET)) {
                 auto user    = matcher.captures[1];
