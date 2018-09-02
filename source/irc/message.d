@@ -34,7 +34,12 @@ struct IRCMessage
             tagValues[tagnamevalue[0]] = tagnamevalue[1];
         }
 
-        return tagValues[tagName];
+        if (tagName in tagValues)
+        {
+            return tagValues[tagName];
+        } else
+        return "";
+
     }
 
     void reply(string message)
