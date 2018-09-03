@@ -91,12 +91,12 @@ public:
 
     void on(IRCMessage.Type type, MessageHandler callback)
     {
-        on(type, MATCHALL, callback);
+        on(type, r".*", callback);
     }
 
     void on(IRCMessage.Type type, MessageHandlerWithArgs callback)
     {
-        on(type, MATCHALL, callback);
+        on(type, r".*", callback);
     }
 
     void on(IRCMessage.Type type, string pattern, MessageHandler callback)
@@ -247,11 +247,6 @@ private:
 
     alias typeForString = TypeForString;
 
-    static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
-    static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
-    static MATCHPING       = ctRegex!r"^PING (.+)$";
-    static MATCHALL        = ctRegex!r".*";
-
     void processLine()
     {
         try 
@@ -296,13 +291,15 @@ private:
                 };
 
                 handleMessage(ircMessage);
-            } else if(auto matcher = matchFirst(line, MATCHNOTICE))
+            } else if(line.canFind(" NOTICE "))
             {
-                const tags    = matcher.captures[1];
-                const channel = matcher.captures[2];
-                const text    = matcher.captures[3];
+                // static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
+                const parts   = line.split(" ");
+                const tags    = parts[0].chompPrefix("@");
+                const channel = parts[3].chompPrefix(":");
+                const text    = line.split(":")[2];
                 const time    = to!DateTime(Clock.currTime());
-                const type    =IRCMessage.Type.NOTICE;
+                const type    = IRCMessage.Type.NOTICE;
                 IRCMessage ircMessage = {
                     type,
                     tags,
@@ -315,11 +312,13 @@ private:
 
                 handleMessage(ircMessage);
 
-            } else if (auto matcher = matchFirst(line, MATCHHOSTTARGET))
+            } else if (line.canFind("HOSTTARGET"))
             {
-                const user    = matcher.captures[1];
-                const channel = matcher.captures[2];
-                const text    = matcher.captures[3];
+                // static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
+                const parts   = line.split(" ");
+                const user    = parts[0].chompPrefix("@");
+                const channel = parts[2];
+                const text    = line.split(":")[1];
                 const time    = to!DateTime(Clock.currTime());
                 const type    = IRCMessage.Type.HOSTTARGET;
 
@@ -340,16 +339,20 @@ private:
                 };
 
                 handleMessage(ircMessage);
-            } else if (auto matcher = matchFirst(line, MATCHPING))
+            } else if (line.canFind("PING"))
             {
-                const server = matcher.captures[1];
+                // static MATCHPING       = ctRegex!r"^PING (.+)$";
+                const parts   = line.split(" ");
+                const server = parts[1];
                 this.sock.pong(server);
             }
 
         } catch (Exception e)
         {
-            //silently ignore the error
-            writeln("Error in line: " ~ line);
+            writeln("Exception in line: " ~ line);
+        } catch (Error e)
+        {
+            writeln("eRROR in line: " ~ line);
         }
 
     }
