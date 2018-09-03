@@ -317,7 +317,6 @@ private:
             } else if (line.canFind("HOSTTARGET"))
             {
                 // static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
-                writeln(line);
                 const parts   = line.split(" ");
                 const user    = parts[0].chompPrefix("@");
                 const channel = parts[2];
