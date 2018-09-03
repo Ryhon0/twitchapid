@@ -75,11 +75,13 @@ public:
 
     bool connected()
     {
+        this.running = true;
         return this.sock.connected();
     }
 
     void disconnect()
     {
+        this.running = false;
         this.sock.disconnect();
     }
 
