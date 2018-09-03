@@ -257,9 +257,9 @@ private:
         try 
         {
             //we cant garentee what the server sends so silently ignore errors
-            if (line.canFind("JOIN") || line.canFind("PART") || line.canFind("QUIT"))
+            if (line.canFind(" JOIN ") || line.canFind(" PART ") || line.canFind(" QUIT "))
             {
-                const parts = line.split(" ");
+                const parts   = line.split(" ");
                 const user    = parts[0].split("!")[0].chompPrefix(":");
                 const typeStr = parts[1];
                 const channel = parts[2].chompPrefix(":");
@@ -275,16 +275,15 @@ private:
                     this
                 };
                 handleMessage(ircMessage);
-            } else if (line.canFind("PRIVMSG"))
+            } else if (line.canFind(" PRIVMSG "))
             {
-                // static MATCHPRIV       = ctRegex!r"^@(\S+) :(\S+)\!\S+ PRIVMSG (\S+) :(.*)$";
                 const parts   = line.split(" ");
-                auto tags    = parts[0].chompPrefix("@");
-                auto user    = parts[1].split("!")[0].chompPrefix(":");
-                auto channel = parts[3];
-                auto text    = line.split(":")[2];
-                auto time    = to!DateTime(Clock.currTime());
-                auto type    = (parts[3])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
+                const tags    = parts[0].chompPrefix("@");
+                const user    = parts[1].split("!")[0].chompPrefix(":");
+                const channel = parts[3];
+                const text    = line.split(":")[2];
+                const time    = to!DateTime(Clock.currTime());
+                const type    = (parts[3])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
                 IRCMessage ircMessage = {
                     type,
                     tags,
@@ -298,7 +297,6 @@ private:
                 handleMessage(ircMessage);
             } else if(line.canFind(" NOTICE "))
             {
-                // static MATCHNOTICE     = ctRegex!r"^@(\S+) :\S+ NOTICE (\S+) :(.*)$";
                 const parts   = line.split(" ");
                 const tags    = parts[0].chompPrefix("@");
                 const channel = parts[3].chompPrefix(":");
@@ -319,7 +317,6 @@ private:
 
             } else if (line.canFind("HOSTTARGET"))
             {
-                // static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
                 const parts   = line.split(" ");
                 const user    = parts[0].chompPrefix("@");
                 const channel = parts[2];
