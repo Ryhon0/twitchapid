@@ -1,7 +1,7 @@
 module irc.client;
 
 import irc.socket, irc.message;
-import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm, std.array;
+import std.regex, std.container, std.datetime, std.conv, std.string, std.algorithm, std.array, std.stdio;
 
 
 alias MessageHandler = void delegate(IRCMessage message);
@@ -317,18 +317,13 @@ private:
             } else if (line.canFind("HOSTTARGET"))
             {
                 // static MATCHHOSTTARGET = ctRegex!r"^:(\S+) HOSTTARGET (\S+) :(.*)$";
+                writeln(line);
                 const parts   = line.split(" ");
                 const user    = parts[0].chompPrefix("@");
                 const channel = parts[2];
-                const text    = line.split(":")[1];
+                const text    = line.split(":")[2];
                 const time    = to!DateTime(Clock.currTime());
                 const type    = IRCMessage.Type.HOSTTARGET;
-
-                if (text.empty)
-                {
-                    writeln("empty text match" ~ line);
-                    return;
-                }
 
                 IRCMessage ircMessage = {
                     type,
