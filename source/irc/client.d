@@ -152,6 +152,9 @@ public:
 
         while (running)
         {
+            if (!this.sock.connected()) {
+                reconnect();
+            }
             readLine();
         }
     }

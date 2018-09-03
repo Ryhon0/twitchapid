@@ -80,8 +80,8 @@ public:
         auto datLength = this.sock.receive(buf[]);
         if (datLength == Socket.ERROR || datLength == 0)
         {
-            writeln("Connection error. reconnecting");
-            reconnect();
+            // writeln("Connection error. reconnecting");
+            // reconnect();
             return null;
         } else
         if (datLength > 0)
