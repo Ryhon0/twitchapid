@@ -6,14 +6,13 @@ import irc.client;
 struct IRCMessage
 {
     enum Type {
-        MESSAGE,      // includes CHAN_MESSAGE & PIV_MESSAGE
-        CHAN_MESSAGE,
-        PRIV_MESSAGE,
+        PRIVMSG,
         JOIN,
         PART,
         QUIT,
         HOSTTARGET,
-        NOTICE
+        NOTICE,
+        OTHER
     }
 
     Type        type;
@@ -23,6 +22,61 @@ struct IRCMessage
     string      channel;
     DateTime    time;
     IRCClient   client;
+    string      rawMessage;
+
+    /**
+     * builds a message from a raw string
+     */
+    this(string rawMessage, IRCClient client)
+    {
+        this.client = client;
+        this.rawMessage = rawMessage;
+        //check for tags and split them out;
+        if (rawMessage.startsWith("@"))
+        {
+            this.tags = rawMessage.split(" ")[0].chompPrefix("@").strip();
+            rawMessage = rawMessage[tags.length + 1 .. $].strip();
+        } else
+        {
+            tags = "";
+        }
+
+        this.nickname = rawMessage.split(" ")[0].split("!")[0].chompPrefix(":");
+        rawMessage = rawMessage[(rawMessage.split(" ")[0].length) .. $].strip();
+
+        string typestring = rawMessage.split(" ")[0].strip();
+        switch (typestring)
+        {
+            case "PRIVMSG":
+                type = Type.PRIVMSG;
+                break;
+            case "JOIN":
+                type = Type.JOIN;
+                break;
+            case "PART":
+                type = Type.PART;
+                break;
+            case "QUIT":
+                type = Type.QUIT;
+                break;
+            case "HOSTTARGET":
+                type = Type.HOSTTARGET;
+                break;
+            case "NOTICE":
+                type = Type.NOTICE;
+                break;
+            default:
+                type = Type.OTHER;
+                break;
+        }
+            
+        rawMessage = rawMessage[(typestring.length) .. $].strip();
+
+        this.channel = rawMessage.split(" ")[0].strip();
+        rawMessage = rawMessage[(channel.length) .. $].strip();
+        text = rawMessage.chompPrefix(":").strip();
+        this.time = cast(DateTime) Clock.currTime();
+    }
 
     string getTagValue(string tagName)
     {
@@ -44,10 +98,6 @@ struct IRCMessage
 
     void reply(string message)
     {
-        if(type == Type.PRIV_MESSAGE) {
-            client.sendMessageToUser(message, nickname);
-        } else {
-            client.sendMessageToChannel(message, channel);
-        }
+        client.sendMessageToChannel(message, channel);
     }
 }

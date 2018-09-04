@@ -73,7 +73,6 @@ user[] getHostIds(user[] hostsToAction)
         return data.length;
     };
     
-
     try{
         http.perform();
     } catch (CurlException e)

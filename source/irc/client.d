@@ -113,12 +113,6 @@ public:
 
     void on(IRCMessage.Type type, Regex!char regex, MessageHandler callback)
     {
-        if(type == IRCMessage.Type.MESSAGE) {
-            on(IRCMessage.Type.CHAN_MESSAGE, regex, callback);
-            on(IRCMessage.Type.PRIV_MESSAGE, regex, callback);
-            return;
-        }
-
         PatternMessageHandler handler = { callback, null, regex };
         if(type !in this.handlers) {
             this.handlers[type] = HandlerList([handler]);
@@ -129,12 +123,6 @@ public:
 
     void on(IRCMessage.Type type, Regex!char regex, MessageHandlerWithArgs callback)
     {
-        if(type == IRCMessage.Type.MESSAGE) {
-            on(IRCMessage.Type.CHAN_MESSAGE, regex, callback);
-            on(IRCMessage.Type.PRIV_MESSAGE, regex, callback);
-            return;
-        }
-
         PatternMessageHandler handler = { null, callback, regex };
         if(type !in this.handlers) {
             this.handlers[type] = HandlerList([handler]);
@@ -210,162 +198,26 @@ public:
     }
 
 private:
-
-    static struct TypeForString
-    {
-    private:
-
-        /*
-            rendered on 2017-Nov-08 15:10:44.5612847 by IsItThere.
-             - PRNG seed: 7931
-             - map length: 8
-             - case sensitive: true
-        */
-
-        static const string[8] _words = ["PART", "", "", "", "", "QUIT", "JOIN", ""];
-
-        static const IRCMessage.Type[8] _filled = [IRCMessage.Type.PART, IRCMessage.Type.MESSAGE, IRCMessage.Type.MESSAGE, IRCMessage.Type.MESSAGE, IRCMessage.Type.MESSAGE, IRCMessage.Type.QUIT, IRCMessage.Type.JOIN, IRCMessage.Type.MESSAGE];
-
-        static const ubyte[256] _coefficients = [230, 3, 191, 24, 104, 192, 64, 157, 218, 34, 173, 68, 216, 208, 167, 199, 0, 151, 122, 27, 169, 124, 64, 6, 96, 101, 183, 149, 228, 174, 221, 9, 193, 56, 159, 78, 163, 47, 26, 20, 117, 200, 46, 227, 66, 240, 128, 254, 95, 136, 20, 116, 36, 46, 24, 88, 34, 76, 97, 91, 187, 94, 206, 176, 74, 143, 225, 14, 57, 20, 157, 29, 49, 92, 189, 65, 135, 3, 148, 145, 118, 34, 72, 138, 75, 92, 140, 41, 131, 212, 2, 144, 109, 100, 140, 2, 249, 120, 175, 144, 224, 95, 66, 106, 184, 32, 47, 110, 89, 19, 85, 131, 84, 254, 118, 244, 167, 44, 45, 108, 141, 89, 41, 157, 247, 253, 138, 153, 174, 108, 21, 158, 9, 253, 47, 182, 95, 66, 204, 200, 205, 203, 241, 21, 38, 90, 239, 48, 218, 253, 48, 34, 195, 83, 167, 239, 157, 97, 164, 77, 43, 200, 201, 18, 154, 253, 228, 164, 53, 86, 228, 138, 14, 200, 192, 0, 53, 57, 164, 107, 163, 41, 176, 32, 62, 78, 56, 220, 209, 228, 158, 30, 208, 89, 197, 24, 186, 210, 11, 143, 71, 246, 178, 157, 133, 127, 200, 102, 114, 220, 232, 46, 104, 236, 240, 24, 122, 243, 75, 157, 47, 212, 47, 223, 212, 7, 100, 100, 243, 63, 199, 236, 107, 136, 218, 174, 93, 136, 25, 17, 100, 233, 94, 144, 90, 51, 116, 51, 232, 208, 254, 173, 207, 209, 49, 70];
-
-        static ushort hash(const char[] word) nothrow pure @safe @nogc
-        {
-            ushort result;
-            foreach(i; 0..word.length)
-            {
-                result += _coefficients[word[i]];
-            }
-            return result % 8;
-        }
-
-    public:
-
-        static IRCMessage.Type opCall(const(char)[] word)
-        {
-            IRCMessage.Type result;
-            const ushort h = hash(word);
-            if (_filled[h])
-                result = _filled[h];
-            return result;
-        }
-    }
-
-    alias typeForString = TypeForString;
-
     void processLine()
     {
-        try 
+        if (line.split(" ")[0] == "PING")
         {
-            //we cant garentee what the server sends so silently ignore errors
-            if (line.canFind(" JOIN ") || line.canFind(" PART ") || line.canFind(" QUIT "))
-            {
-                const parts   = line.split(" ");
-                const user    = parts[0].split("!")[0].chompPrefix(":");
-                const typeStr = parts[1];
-                const channel = parts[2].chompPrefix(":");
-                const time    = to!DateTime(Clock.currTime());
-                const type    = typeForString(typeStr);
-                IRCMessage ircMessage = {
-                    type,
-                    "",
-                    typeStr,
-                    user,
-                    channel,
-                    time,
-                    this
-                };
-                handleMessage(ircMessage);
-            } else if (line.canFind(" PRIVMSG "))
-            {
-                const parts   = line.split(" ");
-                const tags    = parts[0].chompPrefix("@");
-                const user    = parts[1].split("!")[0].chompPrefix(":");
-                const channel = parts[3];
-                const text    = line.split(":")[2];
-                const time    = to!DateTime(Clock.currTime());
-                const type    = (parts[3])[0] == '#' ? IRCMessage.Type.CHAN_MESSAGE : IRCMessage.Type.PRIV_MESSAGE;
-                IRCMessage ircMessage = {
-                    type,
-                    tags,
-                    text,
-                    user,
-                    channel,
-                    time,
-                    this
-                };
-
-                handleMessage(ircMessage);
-            } else if(line.canFind(" NOTICE "))
-            {
-                const parts   = line.split(" ");
-                const tags    = parts[0].chompPrefix("@");
-                const channel = parts[3].chompPrefix(":");
-                const text    = line.split(":")[2];
-                const time    = to!DateTime(Clock.currTime());
-                const type    = IRCMessage.Type.NOTICE;
-                IRCMessage ircMessage = {
-                    type,
-                    tags,
-                    text,
-                    "",
-                    channel,
-                    time,
-                    this
-                };
-
-                handleMessage(ircMessage);
-
-            } else if (line.canFind("HOSTTARGET"))
-            {
-                const parts   = line.split(" ");
-                const user    = parts[0].chompPrefix("@");
-                const channel = parts[2];
-                const text    = line.split(":")[2];
-                const time    = to!DateTime(Clock.currTime());
-                const type    = IRCMessage.Type.HOSTTARGET;
-
-                IRCMessage ircMessage = {
-                    type,
-                    "",
-                    text,
-                    user,
-                    channel,
-                    time,
-                    this
-                };
-
-                handleMessage(ircMessage);
-            } else if (line.canFind("PING"))
-            {
-                // static MATCHPING       = ctRegex!r"^PING (.+)$";
-                const parts   = line.split(" ");
-                const server = parts[1];
-                this.sock.pong(server);
-            }
-
-        } catch (Exception e)
+            this.sock.pong(line.split(" ")[1]);
+        } else
         {
-            writeln("Exception in line: " ~ line);
-        } catch (Error e)
-        {
-            writeln("eRROR in line: " ~ line);
-        }
-
-    }
-
-    void handleMessage(IRCMessage message)
-    {
-        if(message.type in this.handlers) {
-            foreach(PatternMessageHandler h; this.handlers[message.type]) {
-                if(auto matcher = matchFirst(message.text, h.pattern)) {
-                    string[] args;
-                    foreach(string m; matcher.captures) {
-                        args ~= m;
+            IRCMessage message = IRCMessage(line, this);
+            if(message.type in this.handlers) {
+                foreach(PatternMessageHandler h; this.handlers[message.type]) {
+                    if(auto matcher = matchFirst(message.text, h.pattern)) {
+                        string[] args;
+                        foreach(string m; matcher.captures) {
+                            args ~= m;
+                        }
+                        if(h.callback)
+                            h.callback(message);
+                        if(h.callbackWithArgs)
+                            h.callbackWithArgs(message, args[1..$]);
                     }
-                    if(h.callback)
-                        h.callback(message);
-                    if(h.callbackWithArgs)
-                        h.callbackWithArgs(message, args[1..$]);
                 }
             }
         }
