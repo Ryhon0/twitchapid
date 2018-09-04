@@ -285,6 +285,22 @@ public:
         writeOptional("USERS", [target]);
     }
 
+    // @ban-duration=<ban-duration>;ban-reason=<ban-reason> :tmi.twitch.tv CLEARCHAT #<channel> :<user>
+    void banUser(int duration, string reason, string channel, string user)
+    {
+        string message = "@";
+        if (duration > 0)
+        {
+            message ~= "ban-duration=" ~ duration.to!string ~ ";";
+        }
+
+        if(!channel.startsWith("#"))
+            channel = "#"~channel;
+
+        message ~= "ban-reason=" ~ reason ~ " :tmi.twitch.tv CLEARCHAT " ~ channel ~ ":" ~ user;
+        
+    }
+
     void userhost(string[] users)
     {
         write("USERHOST" ~ users.join(" "));

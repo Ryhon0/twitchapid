@@ -177,6 +177,11 @@ public:
         this.sock.privmsg(nickname, message);
     }
 
+    void banUser(int duration, string reason, string channel, string user)
+    {
+        this.sock.banUser(duration, reason, channel, user);
+    }
+
     void broadcast(string message)
     {
         foreach(c; this.channels) {
@@ -208,7 +213,7 @@ private:
             IRCMessage message = IRCMessage(line, this);
             if(message.type in this.handlers) {
                 foreach(PatternMessageHandler h; this.handlers[message.type]) {
-                    if(auto matcher = matchFirst(message.text, h.pattern)) {
+                    if(auto matcher = matchAll(message.text, h.pattern)) {
                         string[] args;
                         foreach(string m; matcher.captures) {
                             args ~= m;
