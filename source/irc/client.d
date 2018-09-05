@@ -208,7 +208,7 @@ private:
             IRCMessage message = IRCMessage(line, this);
             if(message.type in this.handlers) {
                 foreach(PatternMessageHandler h; this.handlers[message.type]) {
-                    if(auto matcher = matchAll(message.text, h.pattern)) {
+                    if(auto matcher = matchFirst(message.text, h.pattern)) {
                         string[] args;
                         foreach(string m; matcher.captures) {
                             args ~= m;
