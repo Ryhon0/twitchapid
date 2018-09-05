@@ -177,11 +177,6 @@ public:
         this.sock.privmsg(nickname, message);
     }
 
-    void banUser(int duration, string reason, string channel, string user)
-    {
-        this.sock.banUser(duration, reason, channel, user);
-    }
-
     void broadcast(string message)
     {
         foreach(c; this.channels) {
