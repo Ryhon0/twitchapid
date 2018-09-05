@@ -6,3 +6,5 @@ public import irc.socket;
 
 public import helix.getusers;
 public import helix.h_helix;
+
+public import kraken.getuseremotes;
