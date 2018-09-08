@@ -34,6 +34,11 @@ public:
         this.nickname = nickname;
         this.password = password;
         this.running  = true;
+
+        this.on(IRCMessage.Type.JOIN, (msg)
+        {
+            channels ~= msg.channel.chompPrefix("#").chomp();
+        });
     }
 
     string name() {
@@ -68,8 +73,6 @@ public:
         if(this.channels.find(channel).empty())
         {
             this.sock.join(channel);
-            this.channels.length++;
-            this.channels[$-1] = channel;
         }
     }
 
@@ -130,6 +133,8 @@ public:
             this.handlers[type].insertBack(handler);
         }
     }
+
+    
 
     void run()
     {

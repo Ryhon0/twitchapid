@@ -25,13 +25,13 @@ public void setClientId(string cid)
     clientid = cid;
 }
 
-user[] getHostIds(user[] hostsToAction)
+void getHostIds(ref user[] hostsToAction)
 {
 
     if (clientid == null)
     {
         writeln("You must set the client id using setClientid(string clientid); before making requests");
-        return hostsToAction;
+        return;
     }
 
     time_t now = Clock.currTime().toUnixTime();
@@ -47,7 +47,7 @@ user[] getHostIds(user[] hostsToAction)
                 printTimeout = false;
             }
         }
-        return hostsToAction;
+        return;
     }
     debug(ConsoleSpam)
     {
@@ -61,7 +61,7 @@ user[] getHostIds(user[] hostsToAction)
         request ~= "&login="~ hostsToAction[i].login;
     }
 
-    auto http = HTTP();
+    HTTP http = HTTP(); //TODO: 66mb in ram? can we reduce this? prehaps look at a raw socket option
     http.url = request;
     http.addRequestHeader("Client-Id", clientid);
     http.method = HTTP.Method.get;
@@ -79,7 +79,7 @@ user[] getHostIds(user[] hostsToAction)
     {
         writeln ("api lookup failed");
         writeln(request);
-        return hostsToAction;
+        return;
     }
 
     string[string] headers = http.responseHeaders();
@@ -144,6 +144,6 @@ user[] getHostIds(user[] hostsToAction)
         writeln(jsonData);
     }
 
-    return hostsToAction;
+    return;
 
 }
