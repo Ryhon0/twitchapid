@@ -4,4 +4,6 @@ authors "Phillip Ledger <phillip@philderbeast.com>"
 copyright "Copyright © 2017 - 2018"
 license "BSD 2-clause"
 
+libs "curl" platform="win64"
+
 targetType "library"

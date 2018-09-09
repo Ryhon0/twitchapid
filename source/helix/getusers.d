@@ -11,18 +11,27 @@ import std.datetime;
 import helix.h_helix;
 import std.stdio;
 
-static time_t timeout = 0;
+private static time_t timeout = 0;
+private static string clientid;
+private static HTTP http;
+private static string jsonData;
 
 debug(ConsoleSpam)
 {
     static printTimeout = true;
 }
 
-private static string clientid;
-
 public void setClientId(string cid)
 {
     clientid = cid;
+    http = HTTP();
+    http.addRequestHeader("Client-Id", clientid);
+    http.method = HTTP.Method.get;
+
+    http.onReceive = (ubyte[] data ) {
+        jsonData ~= cast(string)data;
+        return data.length;
+    };
 }
 
 void getHostIds(ref user[] hostsToAction)
@@ -61,17 +70,7 @@ void getHostIds(ref user[] hostsToAction)
         request ~= "&login="~ hostsToAction[i].login;
     }
 
-    HTTP http = HTTP(); //TODO: 66mb in ram? can we reduce this? prehaps look at a raw socket option
     http.url = request;
-    http.addRequestHeader("Client-Id", clientid);
-    http.method = HTTP.Method.get;
-
-    string jsonData = "";
-
-    http.onReceive = (ubyte[] data ) {
-        jsonData ~= cast(string)data;
-        return data.length;
-    };
     
     try{
         http.perform();
