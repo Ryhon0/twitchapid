@@ -104,7 +104,7 @@ public:
             {
                 line = lines[0];
                 //RFC1493 lines will always end with CR/LF
-                rxbuffer = rxbuffer.chompPrefix(line ~ "\r\n");
+                rxbuffer = rxbuffer[line.length+2 .. $];
             } else if(endsWith(rxbuffer, "\r\n"))
             {
                 line = rxbuffer.chomp();

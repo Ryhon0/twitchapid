@@ -131,18 +131,19 @@ void getHostIds(ref user[] hostsToAction)
 
         } else
         {
-            writeln("unexpected response");
             writeln(jsonData);
             writeln(request);
+            writeln("unexpected response");
 
         }
         
     } catch (JSONException e)
     {
-        writeln("unable to read Json");
         writeln(jsonData);
+        writeln("unable to read Json");
     }
 
+    jsonData = "";
     return;
 
 }
