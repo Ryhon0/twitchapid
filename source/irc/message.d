@@ -36,9 +36,6 @@ struct IRCMessage
         {
             this.tags = rawMessage.split(" ")[0].chompPrefix("@").strip();
             rawMessage = rawMessage[tags.length + 1 .. $].strip();
-        } else
-        {
-            tags = "";
         }
 
         this.nickname = rawMessage.split(" ")[0].split("!")[0].chompPrefix(":");

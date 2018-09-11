@@ -10,7 +10,7 @@ private:
     char[]         host;
     ushort         port;
     TcpSocket      sock;
-    string         rxbuffer;
+    char[]         rxbuffer;
 
     private void write(string message)
     {
@@ -73,7 +73,7 @@ public:
         return connect();
     }
 
-    string read()
+    char[] read()
     {
         char[] buf = new char[](4096);
 
@@ -86,15 +86,15 @@ public:
         } else
         if (datLength > 0)
         {
-            string line = buf[0 .. datLength].to!string;
+            char[] line = buf[0 .. datLength];
             return line;
         }
-        return "";
+        return null;
     }
 
-    string readln()
+    char[] readln()
     {
-        string line;
+        char[] line;
 
         if (!rxbuffer.empty)
         {
@@ -108,7 +108,7 @@ public:
             } else if(endsWith(rxbuffer, "\r\n"))
             {
                 line = rxbuffer.chomp();
-                rxbuffer = "";
+                rxbuffer = null;
             } else 
             {
                 rxbuffer ~= read();
@@ -270,9 +270,9 @@ public:
         write("PING " ~ server);
     }
 
-    void pong(string server)
+    void pong(char[] server)
     {
-        write("PONG " ~ server);
+        write("PONG " ~ server.to!string);
     }
 
     void away(string message = null)

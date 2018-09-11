@@ -24,7 +24,7 @@ private:
     string[]                     channels;
     HandlerList[IRCMessage.Type] handlers;
     bool                         running;
-    string                       line;
+    char[]                       line;
 
 public:
 
@@ -37,7 +37,7 @@ public:
 
         this.on(IRCMessage.Type.JOIN, (msg)
         {
-            channels ~= msg.channel.chompPrefix("#").chomp();
+            channels ~= msg.channel.chompPrefix("#").chomp().to!string;
         });
     }
 
@@ -210,13 +210,13 @@ private:
             this.sock.pong(line.split(" ")[1]);
         } else
         {
-            IRCMessage message = IRCMessage(line, this);
+            IRCMessage message = IRCMessage(line.to!string, this);
             if(message.type in this.handlers) {
                 foreach(PatternMessageHandler h; this.handlers[message.type]) {
                     if(auto matcher = matchFirst(message.text, h.pattern)) {
                         string[] args;
                         foreach(string m; matcher.captures) {
-                            args ~= m;
+                            args ~= m.to!string;
                         }
                         if(h.callback)
                             h.callback(message);
