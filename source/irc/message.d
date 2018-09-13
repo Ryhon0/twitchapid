@@ -12,6 +12,7 @@ struct IRCMessage
         QUIT,
         HOSTTARGET,
         NOTICE,
+        RECONNECT,
         OTHER
     }
 
@@ -62,16 +63,21 @@ struct IRCMessage
             case "NOTICE":
                 type = Type.NOTICE;
                 break;
+            case "RECONNECT":
+                type = Type.RECONNECT;
+                break;
             default:
                 type = Type.OTHER;
                 break;
         }
             
-        rawMessage = rawMessage[(typestring.length) .. $].strip();
-
-        this.channel = rawMessage.split(" ")[0].strip();
-        rawMessage = rawMessage[(channel.length) .. $].strip();
-        text = rawMessage.chompPrefix(":").strip();
+        if (type != Type.RECONNECT || Type.OTHER)
+        {
+            rawMessage = rawMessage[(typestring.length) .. $].strip();
+            this.channel = rawMessage.split(" ")[0].strip();
+            rawMessage = rawMessage[(channel.length) .. $].strip();
+            text = rawMessage.chompPrefix(":").strip();
+        }
         this.time = cast(DateTime) Clock.currTime();
     }
 

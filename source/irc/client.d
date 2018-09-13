@@ -39,6 +39,11 @@ public:
         {
             channels ~= msg.channel.chompPrefix("#").chomp().to!string;
         });
+
+        this.on(IRCMessage.Type.RECONNECT, (msg)
+        {
+            this.running = false;
+        });
     }
 
     string name() {
@@ -133,8 +138,6 @@ public:
             this.handlers[type].insertBack(handler);
         }
     }
-
-    
 
     void run()
     {
