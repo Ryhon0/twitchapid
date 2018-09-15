@@ -34,7 +34,15 @@ public void setClientId(string cid)
     };
 }
 
-void getHostIds(ref user[] hostsToAction)
+void getUserId(ref user u)
+{
+    user[] userarray;
+    userarray ~= u;
+    getUserIds(userarray);
+    u = userarray[0];
+}
+
+void getUserIds(ref user[] users)
 {
 
     if (clientid == null)
@@ -63,11 +71,11 @@ void getHostIds(ref user[] hostsToAction)
         printTimeout = true;
     }
 
-    string request = "https://api.twitch.tv/helix/users?login="~ hostsToAction[0].login ;
+    string request = "https://api.twitch.tv/helix/users?login="~ users[0].login ;
 
-    for (int i = 1; i < hostsToAction.length && i < 100; i++)
+    for (int i = 1; i < users.length && i < 100; i++)
     {
-        request ~= "&login="~ hostsToAction[i].login;
+        request ~= "&login="~ users[i].login;
     }
 
     http.url = request;
@@ -108,7 +116,7 @@ void getHostIds(ref user[] hostsToAction)
         int j = 0;
         debug(ConsoleSpam)
         {
-            writeln(hostsToAction.length.to!string ~ " users inqueue");
+            writeln(users.length.to!string ~ " users inqueue");
         }
         if ("data" in json)
         {
@@ -117,15 +125,15 @@ void getHostIds(ref user[] hostsToAction)
                 writeln(json["data"].array.length.to!string ~ " users fetched");
             }
 
-            for (int i = 0; i < hostsToAction.length && i < 100; i++)
+            for (int i = 0; i < users.length && i < 100; i++)
             {
                 if ("id" in json["data"][i])
                 {
                     int id = to!int(json["data"][i]["id"].str);
-                    hostsToAction[i].id = id;
+                    users[i].id = id;
                 }else 
                 {
-                    hostsToAction[i].id = -1;
+                    users[i].id = -1;
                 }
             }
 
