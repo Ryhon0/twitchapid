@@ -80,16 +80,13 @@ public:
         auto datLength = this.sock.receive(buf[]);
         if (datLength == Socket.ERROR || datLength == 0)
         {
-            // writeln("Connection error. reconnecting");
-            // reconnect();
+            disconnect();
             return null;
         } else
-        if (datLength > 0)
         {
             char[] line = buf[0 .. datLength];
             return line;
         }
-        return null;
     }
 
     char[] readln()
@@ -109,17 +106,16 @@ public:
             {
                 line = rxbuffer.chomp();
                 rxbuffer = null;
-            } else 
-            {
-                rxbuffer ~= read();
-                return readln();
+                return line;
             }
-            return line;
-        } else
+        } 
+        if (connected())
         {
             rxbuffer ~= read();
             return readln();
         }
+        return line;
+        
     }
 
     void raw(string[] args)
