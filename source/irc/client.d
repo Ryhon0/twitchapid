@@ -81,6 +81,17 @@ public:
         }
     }
 
+    void part(string channel)
+    {
+        if(!channel.startsWith("#"))
+            channel = "#"~channel;
+
+        if(!this.channels.find(channel).empty())
+        {
+            this.sock.part(channel);
+        }
+    }
+
     bool connected()
     {
         this.running = true;
