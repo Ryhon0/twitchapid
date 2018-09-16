@@ -102,6 +102,7 @@ public:
                 line = lines[0];
                 //RFC1493 lines will always end with CR/LF
                 rxbuffer = rxbuffer[line.length+2 .. $];
+                return line;
             } else if(endsWith(rxbuffer, "\r\n"))
             {
                 line = rxbuffer.chomp();
@@ -109,12 +110,15 @@ public:
                 return line;
             }
         } 
+        
         if (connected())
         {
             rxbuffer ~= read();
             return readln();
+        } else
+        {
+            return line;
         }
-        return line;
         
     }
 

@@ -162,7 +162,11 @@ public:
         {
             writeln("<< " ~ line);
         }
-        processLine();
+
+        if(line != null)
+        {
+            processLine();
+        }
     }
 
     bool isRunning()
