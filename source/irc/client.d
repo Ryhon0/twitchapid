@@ -177,6 +177,9 @@ public:
         if(line != null)
         {
             processLine();
+        }else
+        {
+            this.running = false;
         }
     }
 
