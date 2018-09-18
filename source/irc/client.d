@@ -37,7 +37,7 @@ public:
 
         this.on(IRCMessage.Type.JOIN, (msg)
         {
-            channels ~= msg.channel.chompPrefix("#").chomp().to!string;
+            channels ~= msg.channel.chompPrefix("#").strip().to!string;
         });
 
         this.on(IRCMessage.Type.RECONNECT, (msg)
