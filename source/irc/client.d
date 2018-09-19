@@ -101,6 +101,7 @@ public:
     void disconnect()
     {
         this.running = false;
+        this.channels = null;
         this.sock.disconnect();
     }
 
