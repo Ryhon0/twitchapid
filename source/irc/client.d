@@ -83,11 +83,11 @@ public:
 
     void part(string channel)
     {
-        if(!channel.startsWith("#"))
-            channel = "#"~channel;
-
-        if(!this.channels.find(channel).empty())
+        if(!this.channels.find(channel.chompPrefix("#").strip()).empty())
         {
+            if(!channel.startsWith("#"))
+                channel = "#"~channel;
+
             this.sock.part(channel);
         }
     }
