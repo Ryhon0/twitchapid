@@ -75,7 +75,7 @@ public:
         if(!channel.startsWith("#"))
             channel = "#"~channel;
 
-        if(this.channels.find(channel).empty())
+        if(this.channels.find(channel.chompPrefix("#").strip()).empty())
         {
             this.sock.join(channel);
         }
@@ -216,7 +216,7 @@ public:
         if(!channel.startsWith("#"))
             channel = "#"~channel;
             
-        return !(this.channels.find(channel).empty);
+        return !(this.channels.find(channel.chompPrefix("#").strip()).empty);
     }
 
     ulong getChannelCount()
