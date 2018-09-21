@@ -113,7 +113,6 @@ void getUserIds(ref user[] users)
     try{
         JSONValue json = parseJSON(jsonData);
 
-        int j = 0;
         debug(ConsoleSpam)
         {
             writeln(users.length.to!string ~ " users inqueue");
