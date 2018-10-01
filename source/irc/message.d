@@ -13,6 +13,7 @@ struct IRCMessage
         HOSTTARGET,
         NOTICE,
         RECONNECT,
+        USERNOTICE,
         OTHER
     }
 
@@ -66,11 +67,14 @@ struct IRCMessage
             case "RECONNECT":
                 type = Type.RECONNECT;
                 break;
+            case "USERNOTICE":
+                type = Type.USERNOTICE;
+                break;
             default:
                 type = Type.OTHER;
                 break;
         }
-            
+
         if (type != Type.RECONNECT || Type.OTHER)
         {
             rawMessage = rawMessage[(typestring.length) .. $].strip();
