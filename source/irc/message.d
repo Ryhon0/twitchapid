@@ -6,14 +6,19 @@ import irc.client;
 struct IRCMessage
 {
     enum Type {
-        PRIVMSG,
-        JOIN,
-        PART,
-        QUIT,
-        HOSTTARGET,
-        NOTICE,
-        RECONNECT,
-        USERNOTICE,
+        PRIVMSG,            // default irc types
+        JOIN,               // default irc types
+        PART,               // default irc types
+        QUIT,               // default irc types
+        HOSTTARGET,         // default irc types
+        NOTICE,             // default irc types
+        RECONNECT,          // default irc types
+        CLEARCHART,         // twitch message type
+        CLEARMSG,           // twitch message type
+        GLOABLUSERSTATE,    // twitch message type
+        ROOMSTATE,          // twitch message type
+        USERNOTICE,         // twitch message type
+        USERSTATE,          // twitch message type
         OTHER
     }
 
@@ -70,6 +75,25 @@ struct IRCMessage
             case "USERNOTICE":
                 type = Type.USERNOTICE;
                 break;
+                CLEARCHART
+            case "CLEARCHART":
+                type= Type.CLEARCHART;
+                break;
+            case "CLEARMSG":
+                type= Type.CLEARMSG;
+                break;
+            case "GLOABLUSERSTATE":
+                type= Type.GLOABLUSERSTATE;
+                break;
+            case "ROOMSTATE":
+                type= Type.ROOMSTATE;
+                break;
+            case "USERNOTICE":
+                type= Type.USERNOTICE;
+                break;
+            case "USERSTATE":
+                type= Type.USERSTATE;
+                break;
             default:
                 type = Type.OTHER;
                 break;
@@ -100,9 +124,11 @@ struct IRCMessage
             return tagValues[tagName];
         } else
         return "";
-
     }
 
+    /**
+     *  sends a reply to a specific message
+     */
     void reply(string message)
     {
         client.sendMessageToChannel(message, channel);
