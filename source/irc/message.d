@@ -72,10 +72,6 @@ struct IRCMessage
             case "RECONNECT":
                 type = Type.RECONNECT;
                 break;
-            case "USERNOTICE":
-                type = Type.USERNOTICE;
-                break;
-                CLEARCHART
             case "CLEARCHART":
                 type= Type.CLEARCHART;
                 break;
