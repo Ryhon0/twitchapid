@@ -13,7 +13,7 @@ struct IRCMessage
         HOSTTARGET,         // default irc types
         NOTICE,             // default irc types
         RECONNECT,          // default irc types
-        CLEARCHART,         // twitch message type
+        CLEARCHAT,         // twitch message type
         CLEARMSG,           // twitch message type
         GLOABLUSERSTATE,    // twitch message type
         ROOMSTATE,          // twitch message type
@@ -72,8 +72,8 @@ struct IRCMessage
             case "RECONNECT":
                 type = Type.RECONNECT;
                 break;
-            case "CLEARCHART":
-                type= Type.CLEARCHART;
+            case "CLEARCHAT":
+                type= Type.CLEARCHAT;
                 break;
             case "CLEARMSG":
                 type= Type.CLEARMSG;
